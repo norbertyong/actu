@@ -2,11 +2,13 @@
 
 **Version 0.3.0 — paquet cPanel prêt à installer.** Agrégateur PHP de veille cybersécurité, informatique et Linux, avec historique SQLite, favoris, recherches enregistrées, gestion des sources et alertes. Voir les [notes de version](RELEASE_NOTES.md).
 
-**Hébergement cPanel :** suivre le [guide pas à pas](#installation-sur-cpanel-pas-à-pas) ci-dessous.
+**Sur cPanel :** utilisez l’[installation express](#installation-express--copier-ouvrir-configurer). Le [guide avancé](#installation-avancée-sur-cpanel-depuis-les-sources) reste disponible pour une installation manuelle depuis le code source.
 
 ## Installation express : copier, ouvrir, configurer
 
-Téléchargez **`actu-cpanel-v0.3.0.zip`** depuis [la release v0.3.0](https://github.com/norbertyong/actu/releases/tag/v0.3.0). Choisissez ce fichier dans **Assets**, et non « Source code (zip) » : le paquet a déjà la bonne disposition pour cPanel.
+**[Télécharger directement le ZIP prêt à installer](https://github.com/norbertyong/actu/releases/download/v0.3.0/actu-cpanel-v0.3.0.zip)** · [Somme SHA256](https://github.com/norbertyong/actu/releases/download/v0.3.0/actu-cpanel-v0.3.0.zip.sha256) · [Release v0.3.0](https://github.com/norbertyong/actu/releases/tag/v0.3.0)
+
+Choisissez **`actu-cpanel-v0.3.0.zip`**, et non « Source code (zip) » : le paquet a déjà la bonne disposition pour cPanel.
 
 1. Dans cPanel, choisissez PHP 8.2+ avec `pdo_sqlite`, `curl`, `SimpleXML`, `mbstring` et `session`.
 2. Extrayez **tout le contenu** dans le répertoire du site (`public_html` pour un site dédié, ou `public_html/actu` pour un sous-dossier). Utilisez un dossier neuf ou sauvegardé. Gardez les fichiers cachés **`.htaccess` et `.actu/`** ; activez leur affichage dans le gestionnaire cPanel.
@@ -14,9 +16,28 @@ Téléchargez **`actu-cpanel-v0.3.0.zip`** depuis [la release v0.3.0](https://gi
 4. Dans le gestionnaire cPanel, ouvrez `.actu/config/install.key`, créé sur votre serveur à la première visite. Copiez ce code dans l’assistant, puis choisissez votre utilisateur et votre mot de passe administrateur.
 5. Connectez-vous à l’administration et cliquez sur **Récupérer les articles**. Gardez la page ouverte pendant le traitement des sources.
 
+Après extraction dans un sous-dossier, vous devez obtenir directement :
+
+```text
+public_html/actu/
+├── index.php
+├── install.php
+├── assets/
+├── .htaccess
+└── .actu/
+    ├── app/
+    ├── bin/
+    ├── config/
+    └── storage/
+```
+
+Ne créez pas un dossier `public/` supplémentaire pour ce paquet. Activez **Afficher les fichiers masqués** dans le gestionnaire cPanel avant de vérifier `.actu/`. Le fichier `install.key` apparaît **après la première ouverture du site** ; il est normal qu’il soit absent de l’archive téléchargée.
+
 **Pas de terminal, de `.env`, de configuration manuelle PHP ou de base MySQL à créer.** L’assistant vérifie les prérequis, initialise SQLite, stocke une empreinte du mot de passe et se désactive après installation. Le code d’installation est généré sur l’hébergement ; il n’est jamais inclus dans l’archive publique. Aucun compte administrateur par défaut n’existe.
 
 Ce paquet est destiné à **Apache/LiteSpeed avec `.htaccess` actif**, comme sur les offres cPanel compatibles. Les règles incluses interdisent tout accès HTTP à `.actu/`, qui contient configuration et données. Cette disposition n’est pas adaptée à Nginx seul sans règles équivalentes. HTTPS et les connexions sortantes vers les flux restent nécessaires. Le paquet ne peut pas installer une extension PHP absente de l’hébergement.
+
+### Actualisation des articles
 
 Vous pouvez conserver une collecte manuelle depuis l’administration. Pour l’actualisation sans administrateur connecté, ajoutez **une tâche cron cPanel toutes les 20 minutes**, en adaptant les deux chemins :
 
@@ -24,13 +45,27 @@ Vous pouvez conserver une collecte manuelle depuis l’administration. Pour l’
 /opt/cpanel/ea-php83/root/usr/bin/php /home/CPUSER/public_html/actu/.actu/bin/collect.php >> /home/CPUSER/actu-collect.log 2>&1
 ```
 
+Dans **Tâches cron**, mettez `*/20` dans **Minute**, puis `*` dans les quatre autres champs. Collez uniquement la commande ci-dessus dans **Commande**. Remplacez `CPUSER` par votre compte et faites confirmer le chemin PHP par votre hébergeur.
+
 Pour un site installé directement dans `public_html`, retirez `/actu` du chemin. Le collecteur lit automatiquement la configuration créée par l’assistant. Les alertes email/webhook restent facultatives et désactivées tant que leurs destinations ne sont pas configurées.
 
 **Mises à jour :** le paquet ci-dessus est une archive de première installation. Sauvegardez configuration et base ; ne remplacez pas `.actu/config/` ou `.actu/storage/` par les dossiers d’une archive neuve et ne réintroduisez pas `install.enabled`. Ne supprimez pas la configuration pour « réinstaller » un site existant. Le guide cPanel avancé ci-dessous concerne l’archive de code source et la disposition séparée `public/`.
 
+### Si le démarrage bloque
+
+| Problème | Action |
+| --- | --- |
+| Le site affiche une erreur 403 | Vérifier que tous les fichiers du paquet, notamment les deux niveaux de `.htaccess`, ont été extraits. |
+| Une extension est signalée absente | L’activer dans le sélecteur PHP de cPanel ou demander son activation à l’hébergeur. |
+| Le code d’installation est introuvable | Ouvrir le site une première fois, afficher les fichiers cachés et vérifier que `.actu/config/` est accessible en écriture par PHP. |
+| L’accueil ne contient aucun article | Se connecter et cliquer sur **Récupérer les articles** ; consulter **Sources** si la récupération échoue. |
+| L’assistant indique que l’installation est indisponible après configuration | C’est normal : il est verrouillé. Ouvrir `login.php` pour accéder à l’administration. |
+
+### Construction du paquet pour les développeurs
+
 Pour produire le paquet depuis les sources : `python3 bin/package.py`. Le fichier ZIP et son SHA256 sont créés dans `dist/`, sans caches, base locale, identifiants ou fichiers utilisateur.
 
-## Démarrage
+## Démarrage depuis les sources (développement)
 
 Prérequis : PHP **8.2+**, `pdo_sqlite`, `curl`, `SimpleXML`, `mbstring` et `session`. Aucun Composer, npm ou serveur de base de données n’est nécessaire pour faire fonctionner le site.
 
@@ -71,9 +106,11 @@ docker compose up --build -d
 
 Dans le cloud avec proxy, préparez l’image via la commande `docker build --secret` décrite plus haut et démarrez avec `--no-build` ; transmettez aussi les variables proxy et le montage du bundle CA au collecteur dans un fichier Compose d’override privé. Ne copiez pas les identifiants du proxy dans le dépôt.
 
-## Installation sur cPanel (pas à pas)
+## Installation avancée sur cPanel depuis les sources
 
-Cette procédure installe **la release v0.2.0 sans Docker** sur un hébergement cPanel avec Apache/LiteSpeed et PHP-FPM/CGI. Les noms de menus peuvent varier selon l’hébergeur. Aucun MySQL, Node.js, Composer ou accès root n’est nécessaire.
+Cette méthode manuelle reste disponible pour le code source v0.3.0, avec une racine web `public/` distincte. Pour copier l’archive prête à installer, suivez uniquement l’installation express ci-dessus.
+
+Cette procédure installe **le code source sans Docker** sur un hébergement cPanel avec Apache/LiteSpeed et PHP-FPM/CGI. Les noms de menus peuvent varier selon l’hébergeur. Aucun MySQL, Node.js, Composer ou accès root n’est nécessaire.
 
 Dans les exemples, remplacez partout :
 
