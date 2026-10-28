@@ -1,5 +1,7 @@
 # Actu Cyber & IT
 
+Version courante : **0.1.0** (première version de développement). Voir les [notes de version](RELEASE_NOTES.md).
+
 Application PHP de veille sur la cybersécurité, l’informatique et Linux. Elle agrège des flux RSS/Atom, déduplique les articles et les affiche du plus récent au plus ancien, avec recherche, filtres par source et catégorie, et pagination.
 
 ## Fonctionnement du site
@@ -155,7 +157,7 @@ Les prochaines versions utiliseront des tags `vMAJEURE.MINEURE.CORRECTIF`, par e
 | **MINEURE** | Ajout de fonctionnalités compatibles. | `v1.2.3` → `v1.3.0` |
 | **CORRECTIF** | Correction compatible ou livraison de documentation seule. | `v1.2.3` → `v1.2.4` |
 
-La série `0.x.y` correspond à la phase initiale de développement, pendant laquelle les interfaces peuvent encore évoluer. `v0.1.0` est le nom prévu pour la première livraison ; aucun tag ni release GitHub n’a encore été créé. Un commit poussé sur `main` n’est pas automatiquement une release ou un déploiement. La version installée peut être identifiée par `git rev-parse --short HEAD` ; `git tag --list` liste les versions balisées disponibles localement.
+La série `0.x.y` correspond à la phase initiale de développement, pendant laquelle les interfaces peuvent encore évoluer. La première livraison est `v0.1.0`. Un commit poussé sur `main` n’est pas automatiquement une release ou un déploiement. La version installée peut être identifiée par `git rev-parse --short HEAD` ; `git tag --list` liste les versions balisées disponibles localement.
 
 ### Préparer une version
 
@@ -171,4 +173,18 @@ La série `0.x.y` correspond à la phase initiale de développement, pendant laq
 
 5. Créer une release GitHub associée au tag et y reprendre les notes correspondantes. Le déploiement sur le serveur reste une opération séparée.
 
-Ne déplacez pas un tag déjà publié : corrigez le problème dans une nouvelle version. Le numéro de version n’est actuellement ni stocké dans un fichier `VERSION`, ni affiché dans l’interface ; le tag Git et les notes de version servent de références.
+Ne déplacez pas un tag déjà publié : corrigez le problème dans une nouvelle version. Le fichier `VERSION` contient le numéro courant, sans préfixe `v`. Mettez-le à jour avec le README et les notes de version avant chaque livraison. Le numéro n’est pas encore affiché dans l’interface du site.
+
+### Consulter et installer une release
+
+Les releases GitHub sont accessibles dans [la page Releases du dépôt](https://github.com/norbertyong/actu/releases). Chaque release associe un tag, ses notes et les archives du code source générées par GitHub. Ces archives ne contiennent ni les caches locaux ni les journaux ignorés par Git.
+
+Pour consulter le code exact de la première version dans un checkout sans modifications locales :
+
+```sh
+git fetch origin --tags
+git switch --detach v0.1.0
+cat VERSION
+```
+
+Pour reprendre le développement, revenez à votre branche de travail. Après installation d’une release, configurez les variables administrateur, les droits du cache et les flux comme décrit plus haut ; une release n’inclut pas les identifiants ou la configuration privée d’un serveur.

@@ -2,6 +2,12 @@
 
 ## Non publié
 
+Aucun changement en attente.
+
+## v0.1.0 — 28 octobre 2026
+
+Première version de développement.
+
 ### Documentation
 
 - Description du cycle de collecte, du cache, de la déduplication et des filtres.
@@ -9,9 +15,9 @@
 - Convention de versionnement, préparation des tags et distinction entre commit, release et déploiement.
 - Précision sur les fonctions annoncées mais non implémentées et l’incohérence du filtre par source des vulnérabilités.
 
-## Import initial — commit `3ab2db8`
+### Base de la version
 
-Code intégré à `main`, sans tag de version ni release GitHub.
+Import initial issu du commit `3ab2db8`, avec sa documentation complétée.
 
 ### Ajouts
 
@@ -41,4 +47,4 @@ Code intégré à `main`, sans tag de version ni release GitHub.
 - Exclusions Git et absence de valeurs d’identifiants dans les scripts actifs vérifiées.
 - Syntaxe PHP et démarrage non exécutés : l’interpréteur PHP n’est pas installé dans l’environnement courant.
 
-Aucun tag ni aucune release GitHub n’a été créé pour cette importation.
+La publication du tag ne déploie pas automatiquement le site.
