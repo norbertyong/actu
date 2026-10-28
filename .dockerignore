@@ -9,3 +9,9 @@ index.good
 attachments
 
 node_modules
+
+config/*
+!config/.htaccess
+dist
+
+**/__pycache__

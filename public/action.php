@@ -15,5 +15,6 @@ if (in_array($action,['favorite','read'],true)) {
     run('INSERT INTO searches(reader,name,filters) VALUES(?,?,?)',[$reader,$name,json_encode($clean)]);flash('Recherche enregistrée sur ce navigateur.');
 } elseif ($action==='delete_search') { run('DELETE FROM searches WHERE id=? AND reader=?',[(int)input('id','0',$_POST),$reader]);flash('Recherche supprimée.'); }
 $back=$_SERVER['HTTP_REFERER']??'';$path=parse_url($back,PHP_URL_PATH);$query=parse_url($back,PHP_URL_QUERY);
+$base=base_path();if($base!=='' && is_string($path) && str_starts_with($path,$base.'/'))$path=substr($path,strlen($base));
 if (!in_array($path,['/index.php','/vulprod.php','/favorites.php','/'],true)) $path='/index.php';
 redirect($path.($query?'?'.$query:''));

@@ -2,9 +2,29 @@
 
 ## Non publié
 
-### Documentation
+## v0.3.0 — 28 octobre 2026
 
-- Guide cPanel pas à pas : PHP, racine publique, configuration privée PHP-FPM/CLI, initialisation, cron, alertes, sauvegarde et dépannage.
+### Installation prête pour cPanel
+
+- Archive de déploiement dédiée : fichiers publics à la racine, code/configuration/SQLite dans `.actu/` protégé par Apache/LiteSpeed.
+- Assistant de première installation : contrôle des extensions, code privé généré sur le serveur, création de l’accès administrateur et initialisation SQLite.
+- Configuration locale automatique commune au web et à la CLI ; aucun fichier `.env` ou bootstrap manuel à préparer.
+- Verrouillage de l’installateur après installation, protection CSRF, mot de passe haché et verrou exclusif contre les installations simultanées.
+- Navigation, formulaires, redirections et cookies compatibles avec les sous-dossiers.
+- Collecte manuelle depuis l’administration, source par source, sans terminal. Les mises à jour sans visite nécessitent toujours une tâche planifiée.
+- Générateur d’archive avec liste explicite des fichiers et somme SHA256 ; publication du paquet dans les assets GitHub.
+
+### Validation
+
+- 107 contrôles réussis : 52 PHP, 12 collecte HTTP et 43 installation réelle Apache en racine et sous-dossier.
+- Aucun message externe envoyé ni accès au compte cPanel de l’utilisateur.
+
+### Hébergement requis
+
+- PHP 8.2+, extensions SQLite/cURL/SimpleXML/mbstring/session, Apache ou LiteSpeed avec `.htaccess` actif.
+- HTTPS conseillé avant installation ; DNS et HTTPS sortants nécessaires aux flux.
+- Aucun envoi externe d’alerte ni installation de cron n’est activé par l’assistant.
+- Archive de première installation : préserver configuration et données lors des mises à jour.
 
 ## v0.2.0 — 28 octobre 2026
 

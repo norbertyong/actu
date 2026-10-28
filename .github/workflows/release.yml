@@ -47,6 +47,8 @@ jobs:
               raise SystemExit('Notes de version vides')
           Path(os.environ['RUNNER_TEMP'], 'release-notes.md').write_text(notes + '\n')
           PY
+      - name: Construire le paquet cPanel
+        run: python3 bin/package.py --output "$RUNNER_TEMP/actu-cpanel-$RELEASE_TAG.zip"
       - name: Publier la release GitHub
         shell: bash
         run: |
@@ -56,4 +58,6 @@ jobs:
           fi
           gh release create "$RELEASE_TAG" --verify-tag \
             --title "Actu Cyber & IT $RELEASE_TAG" \
-            --notes-file "$RUNNER_TEMP/release-notes.md"
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            "$RUNNER_TEMP/actu-cpanel-$RELEASE_TAG.zip" \
+            "$RUNNER_TEMP/actu-cpanel-$RELEASE_TAG.zip.sha256"

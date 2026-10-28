@@ -25,3 +25,10 @@ Total : **94 contrôles fonctionnels réussis**. Les fixtures et identifiants de
 - Apache/PHP-FPM, Nginx/PHP-FPM, HTTPS public et le déploiement sur le serveur final ne sont pas validés par le serveur de développement.
 
 La configuration de déploiement doit pointer sur `public/`. Le dossier privé SQLite ne doit jamais être exposé par le serveur web. Voir le README pour migration, sauvegardes et planification.
+
+## Paquet cPanel 0.3.0
+
+- `tests/deployment.cjs` : **43 contrôles réussis** sur un vrai serveur Apache, en racine et sous `/veille`.
+- Vérifications : archive sans secrets/données, code d’installation généré sur le serveur, refus d’un mauvais code et d’un formulaire sans CSRF, installation, verrouillage, accès HTTP refusé aux fichiers privés, configuration partagée CLI/web, connexion, favoris, cookies, collecte manuelle sans source externe et affichage mobile.
+- Les **52 tests fonctionnels PHP** et **12 tests de collecte HTTP** sont rejoués pour cette version : total de **107 contrôles** pour ce cycle de validation.
+- L’hébergement cPanel personnel de l’utilisateur n’a pas été testé ; il doit offrir PHP 8.2+, les extensions requises, Apache/LiteSpeed et `.htaccess` actif. La disponibilité réelle des flux et des canaux externes reste distincte.

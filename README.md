@@ -1,8 +1,34 @@
 # Actu Cyber & IT
 
-**Version 0.2.0 — refonte complète.** Agrégateur PHP de veille cybersécurité, informatique et Linux, avec historique SQLite, favoris, recherches enregistrées, gestion des sources et alertes. Voir les [notes de version](RELEASE_NOTES.md).
+**Version 0.3.0 — paquet cPanel prêt à installer.** Agrégateur PHP de veille cybersécurité, informatique et Linux, avec historique SQLite, favoris, recherches enregistrées, gestion des sources et alertes. Voir les [notes de version](RELEASE_NOTES.md).
 
 **Hébergement cPanel :** suivre le [guide pas à pas](#installation-sur-cpanel-pas-à-pas) ci-dessous.
+
+## Installation express : copier, ouvrir, configurer
+
+Téléchargez **`actu-cpanel-v0.3.0.zip`** depuis [la release v0.3.0](https://github.com/norbertyong/actu/releases/tag/v0.3.0). Choisissez ce fichier dans **Assets**, et non « Source code (zip) » : le paquet a déjà la bonne disposition pour cPanel.
+
+1. Dans cPanel, choisissez PHP 8.2+ avec `pdo_sqlite`, `curl`, `SimpleXML`, `mbstring` et `session`.
+2. Extrayez **tout le contenu** dans le répertoire du site (`public_html` pour un site dédié, ou `public_html/actu` pour un sous-dossier). Utilisez un dossier neuf ou sauvegardé. Gardez les fichiers cachés **`.htaccess` et `.actu/`** ; activez leur affichage dans le gestionnaire cPanel.
+3. Ouvrez l’URL du dossier, par exemple `https://exemple.fr/actu/`. L’assistant s’affiche automatiquement.
+4. Dans le gestionnaire cPanel, ouvrez `.actu/config/install.key`, créé sur votre serveur à la première visite. Copiez ce code dans l’assistant, puis choisissez votre utilisateur et votre mot de passe administrateur.
+5. Connectez-vous à l’administration et cliquez sur **Récupérer les articles**. Gardez la page ouverte pendant le traitement des sources.
+
+**Pas de terminal, de `.env`, de configuration manuelle PHP ou de base MySQL à créer.** L’assistant vérifie les prérequis, initialise SQLite, stocke une empreinte du mot de passe et se désactive après installation. Le code d’installation est généré sur l’hébergement ; il n’est jamais inclus dans l’archive publique. Aucun compte administrateur par défaut n’existe.
+
+Ce paquet est destiné à **Apache/LiteSpeed avec `.htaccess` actif**, comme sur les offres cPanel compatibles. Les règles incluses interdisent tout accès HTTP à `.actu/`, qui contient configuration et données. Cette disposition n’est pas adaptée à Nginx seul sans règles équivalentes. HTTPS et les connexions sortantes vers les flux restent nécessaires. Le paquet ne peut pas installer une extension PHP absente de l’hébergement.
+
+Vous pouvez conserver une collecte manuelle depuis l’administration. Pour l’actualisation sans administrateur connecté, ajoutez **une tâche cron cPanel toutes les 20 minutes**, en adaptant les deux chemins :
+
+```sh
+/opt/cpanel/ea-php83/root/usr/bin/php /home/CPUSER/public_html/actu/.actu/bin/collect.php >> /home/CPUSER/actu-collect.log 2>&1
+```
+
+Pour un site installé directement dans `public_html`, retirez `/actu` du chemin. Le collecteur lit automatiquement la configuration créée par l’assistant. Les alertes email/webhook restent facultatives et désactivées tant que leurs destinations ne sont pas configurées.
+
+**Mises à jour :** le paquet ci-dessus est une archive de première installation. Sauvegardez configuration et base ; ne remplacez pas `.actu/config/` ou `.actu/storage/` par les dossiers d’une archive neuve et ne réintroduisez pas `install.enabled`. Ne supprimez pas la configuration pour « réinstaller » un site existant. Le guide cPanel avancé ci-dessous concerne l’archive de code source et la disposition séparée `public/`.
+
+Pour produire le paquet depuis les sources : `python3 bin/package.py`. Le fichier ZIP et son SHA256 sont créés dans `dist/`, sans caches, base locale, identifiants ou fichiers utilisateur.
 
 ## Démarrage
 
@@ -109,7 +135,7 @@ Certaines interfaces demandent seulement `actu/public`, relatif au répertoire p
 
 Le DocumentRoot du **domaine principal** n’est généralement pas modifiable depuis cPanel, et certaines offres imposent tous les domaines sous `public_html`. Dans ce cas, utilisez un sous-domaine dont la racine est configurable ou demandez à l’hébergeur de pointer le domaine vers `actu/public`. Si le panneau interdit un dossier hors de `public_html`, faites valider une disposition sûre par l’hébergeur ; ne rendez pas les dossiers `app/`, `bin/` ou `storage/` accessibles pour contourner la restriction. Cette procédure suppose cette racine publique correctement configurée.
 
-Les URL de l’application commencent par `/` : préférez un domaine/sous-domaine dédié, plutôt qu’une installation à `exemple.fr/actu/`.
+Le paquet prêt à installer v0.3.0 prend également en charge les sous-dossiers. La procédure avancée ci-dessous conserve la disposition de développement avec une racine `public/` distincte.
 
 ### Étape 4 — Activer HTTPS
 
@@ -404,7 +430,7 @@ L’email nécessite un transport `mail()` réellement configuré sur le serveur
 
 ## Déploiement et migration depuis 0.1.0
 
-**Changement incompatible : le DocumentRoot doit pointer sur `public/`.** Ne servez plus la racine du dépôt. Le routeur fourni est destiné au serveur de développement ; en production, configurez Apache/PHP-FPM ou Nginx/PHP-FPM avec la racine publique et l’exécution des seuls scripts PHP existants.
+**Installation depuis les sources : le DocumentRoot doit pointer sur `public/`.** Le paquet cPanel prêt à installer dispose de sa propre disposition protégée `.actu/` et se copie directement dans le répertoire web, comme expliqué au début de ce README. Ne servez plus la racine du dépôt. Le routeur fourni est destiné au serveur de développement ; en production, configurez Apache/PHP-FPM ou Nginx/PHP-FPM avec la racine publique et l’exécution des seuls scripts PHP existants.
 
 1. Sauvegarder l’ancienne installation et ses données privées hors de la racine web.
 2. Installer les extensions PHP, notamment SQLite.

@@ -89,7 +89,7 @@ function is_admin(): bool
 }
 function redirect(string $url): never
 {
-    header("Location: " . $url, true, 303);
+    header("Location: " . base_path() . $url, true, 303);
     exit();
 }
 function require_admin(): void
@@ -124,7 +124,7 @@ function reader(): string
         $token = bin2hex(random_bytes(32));
         setcookie("actu_reader", $token, [
             "expires" => time() + 31536000,
-            "path" => "/",
+            "path" => base_path() . "/",
             "secure" => is_https(),
             "httponly" => true,
             "samesite" => "Lax",
@@ -268,4 +268,10 @@ function article_order(array $f): string
     return (($f["sort"] ?? "latest") === "severity"
         ? "(SELECT MAX(c.cvss) FROM article_cves ac JOIN cves c ON c.id=ac.cve_id WHERE ac.article_id=a.id) DESC,"
         : "") . "a.published DESC,a.id DESC";
+}
+
+function base_path(): string {
+    if (PHP_SAPI === 'cli') return '';
+    $path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
+    return $path === '/' || $path === '.' ? '' : rtrim($path, '/');
 }

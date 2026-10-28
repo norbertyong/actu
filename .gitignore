@@ -11,3 +11,10 @@
 !.env.example
 
 /node_modules/
+
+/config/*
+!/config/.htaccess
+/dist/
+/public/.user.ini
+
+__pycache__/
