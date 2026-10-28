@@ -1,0 +1,2 @@
+# Le DocumentRoot doit être public/. Refuser l’accès à l’ancienne racine.
+Require all denied

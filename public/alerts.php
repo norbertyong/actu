@@ -1,0 +1,18 @@
+<?php
+require __DIR__.'/../app/bootstrap.php';require_admin();require __DIR__.'/../app/view.php';
+$error='';
+if($_SERVER['REQUEST_METHOD']==='POST') {
+ verify_csrf();$action=input('action','',$_POST);$id=(int)input('id','0',$_POST);
+ if($action==='create') {
+  $name=mb_substr(input('name','',$_POST),0,80);$keyword=mb_substr(input('keyword','',$_POST),0,150);$cat=input('category','',$_POST);
+  if(!$name || !$keyword || !in_array($cat,['','cyber','it','linux','vulprod'],true)) $error='Nom, mot-clé et catégorie valides requis.';
+  elseif((int)run('SELECT COUNT(*) FROM rules')->fetchColumn()>=50) $error='50 règles maximum.';
+  else { run('INSERT INTO rules(name,keyword,category) VALUES(?,?,?)',[$name,$keyword,$cat]);generate_notifications();flash('Règle créée. Les correspondances des 7 derniers jours sont disponibles.');redirect('/alerts.php'); }
+ } elseif($action==='toggle') { run('UPDATE rules SET enabled=1-enabled WHERE id=?',[$id]);redirect('/alerts.php'); }
+ elseif($action==='delete') { run('DELETE FROM rules WHERE id=?',[$id]);flash('Règle et notifications associées supprimées.');redirect('/alerts.php'); }
+}
+page_start('Alertes');admin_nav('alerts.php');heading('SURVEILLANCE CIBLÉE','Ne manquez plus vos sujets.','Les règles cherchent une expression dans les titres et résumés. Les notifications externes restent facultatives.');
+if($error):?><p class="notice error"><?=e($error)?></p><?php endif ?>
+<section class="panel"><h2>Créer une règle</h2><form method="post" class="form-grid"><?=csrf_field()?><input type="hidden" name="action" value="create"><div><label for="name">Nom de la veille</label><input id="name" name="name" required maxlength="80" placeholder="Ex. Parc Microsoft"></div><div><label for="keyword">Mot-clé ou expression</label><input id="keyword" name="keyword" required maxlength="150" placeholder="Ex. Microsoft"></div><div><label for="category">Catégorie</label><select id="category" name="category"><option value="">Toutes</option><?php foreach(['cyber','it','linux','vulprod'] as $cat):?><option><?=$cat?></option><?php endforeach ?></select></div><div><button>Créer la règle</button></div></form></section>
+<section class="panel"><h2>Règles enregistrées</h2><?php $rules=run('SELECT * FROM rules ORDER BY id DESC')->fetchAll();if(!$rules):?><p>Aucune règle pour le moment.</p><?php endif ?><?php foreach($rules as $r):?><div class="saved-row"><span><strong><?=e($r['name'])?></strong> · <?=e($r['keyword'])?> · <?=$r['enabled']?'Active':'En pause'?></span><form method="post"><?=csrf_field()?><input type="hidden" name="id" value="<?=$r['id']?>"><button class="text-button" name="action" value="toggle"><?=$r['enabled']?'Mettre en pause':'Activer'?></button><button class="text-button" name="action" value="delete">Supprimer</button></form></div><?php endforeach ?></section>
+<section class="panel"><h2>Dernières notifications</h2><p class="muted">100 dernières correspondances, sans doublon par règle et article. Les canaux configurés sont traités par <code>php bin/notify.php --send</code>.</p><?php $notifications=run('SELECT n.*,r.name,a.title,a.url FROM notifications n JOIN rules r ON r.id=n.rule_id JOIN articles a ON a.id=n.article_id ORDER BY n.id DESC LIMIT 100')->fetchAll();if(!$notifications):?><p>Aucune correspondance pour le moment.</p><?php endif ?><?php foreach($notifications as $n):?><div class="notification"><span class="badge"><?=e($n['name'])?></span><a href="<?=e($n['url'])?>" target="_blank" rel="noopener noreferrer"><?=e($n['title'])?></a><small><?=e(when((int)$n['created']))?> · <?=$n['delivered']?'Canaux configurés traités':'Disponible sur le site'?></small></div><?php endforeach ?></section><?php page_end();

@@ -1,0 +1,11 @@
+.git
+storage/*
+cache
+*.log
+error_log
+index.old
+index.good
+.env*
+attachments
+
+node_modules

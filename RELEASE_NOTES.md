@@ -2,7 +2,42 @@
 
 ## Non publié
 
-Aucun changement en attente.
+## v0.2.0 — refonte (livraison préparée)
+
+### Nouveautés
+
+- Nouvelle interface responsive, navigation commune, thème clair/sombre/automatique et styles locaux.
+- Historique SQLite sans limite de 300 articles, filtres combinés par période, catégorie, source et état de lecture.
+- Favoris, articles lus et recherches enregistrées propres à chaque navigateur ; effacement des données de lecture.
+- Gestion administrateur des sources : ajout, modification, activation, test, diagnostic et import/export OPML.
+- Collecte CLI indépendante des visites, verrou exclusif, délai de 20 minutes et requêtes HTTP conditionnelles.
+- Extraction des CVE, import du catalogue CISA KEV et enrichissement CVSS facultatif par NVD.
+- Règles de veille, notifications internes et commandes d’envoi email/webhook configurables.
+- Exports CSV et RSS filtrés, statistiques journalières agrégées, pages Confidentialité et Versions.
+- Dockerfile sans privilèges, services Compose web/collecteur, tests PHP, parcours Playwright et workflow CI.
+
+### Corrections et sécurité
+
+- Sources communes à toutes les pages ; suppression de la configuration divergente et du filtre par source incohérent.
+- Pagination bornée, paramètres de requête validés et prise en charge Atom avec espace de noms.
+- Authentification partagée, mot de passe haché configurable, renouvellement/expiration de session et limitation des tentatives.
+- Protection CSRF sur les mutations et la déconnexion, cookies HttpOnly/SameSite et politique CSP.
+- Validation des URL et redirections, refus des adresses privées/réservées, limites de taille et XML sans entités externes.
+- SQLite et données privées hors de la racine publique ; disparition des lectures des anciens journaux visiteurs.
+
+### Migration incompatible
+
+- Le DocumentRoot doit désormais pointer sur `public/` et PHP doit disposer de `pdo_sqlite`.
+- Lancer `php bin/init.php`, puis `php bin/collect.php`, et planifier la collecte séparément.
+- Les anciennes données de cache et `feeds.php` ne sont pas importées automatiquement. Les anciennes données locales restent préservées hors de la racine publique.
+- Les canaux d’alerte nécessitent leurs destinations ; l’email nécessite un transport mail configuré.
+
+### Validation et limites
+
+- 94 contrôles fonctionnels réussis : 52 PHP, 12 collecte HTTP simulée et 30 parcours Chromium. Rapport détaillé : `docs/VALIDATION.md`.
+- L’accès réel aux sources, à NVD et aux canaux d’alerte dépend du réseau et des services configurés. Les fixtures ne prouvent pas leur disponibilité.
+- Le cron et les transports externes ne sont pas installés automatiquement. Les favoris restent locaux au navigateur.
+- Cette refonte ne crée pas automatiquement de tag ou de release GitHub et ne déploie pas le site.
 
 ## v0.1.0 — 28 octobre 2026
 

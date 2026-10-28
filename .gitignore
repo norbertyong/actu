@@ -1,14 +1,13 @@
-# Données générées et journaux locaux
+/storage/*
+!/storage/.gitkeep
 /cache/*
 !/cache/.gitkeep
 *.log
 /error_log
-
-# Anciennes copies livrées dans l’archive (conservées localement)
 /index.old
 /index.good
-
-# Configuration privée locale
 .env
 .env.*
 !.env.example
+
+/node_modules/

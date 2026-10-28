@@ -1,0 +1,38 @@
+name: Validation
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  php-and-browser:
+    runs-on: ubuntu-24.04
+    env:
+      ACTU_STORAGE: /tmp/actu-ci
+      ACTU_ADMIN_USER: admin-test
+      ACTU_ADMIN_PASSWORD: local-testing-only-2026
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: PHP et extensions
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y php-cli php-curl php-xml php-mbstring php-sqlite3
+      - name: Syntaxe et tests PHP
+        run: |
+          for file in app/*.php public/*.php bin/*.php tests/*.php; do php -l "$file" || exit 1; done
+          php tests/run.php
+          php tests/collector.php
+      - name: Dépendances navigateur
+        run: |
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
+      - name: Préparer le serveur de test
+        run: |
+          ACTU_TEST_MODE=1 php tests/seed.php
+          php -S 127.0.0.1:8000 -t public public/router.php > /tmp/actu-ci-server.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8000/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/actu-ci-server.log
+          exit 1
+      - name: Parcours navigateur
+        run: npm run test:browser

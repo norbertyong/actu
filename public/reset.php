@@ -1,0 +1,2 @@
+<?php
+require __DIR__.'/../app/bootstrap.php';if($_SERVER['REQUEST_METHOD']!=='POST') { http_response_code(405);exit; }verify_csrf();$reader=reader();run('DELETE FROM states WHERE reader=?',[$reader]);run('DELETE FROM searches WHERE reader=?',[$reader]);setcookie('actu_reader','',['expires'=>time()-3600,'path'=>'/','secure'=>is_https(),'httponly'=>true,'samesite'=>'Lax']);flash('Vos données de lecture ont été effacées.');redirect('/privacy.php');
