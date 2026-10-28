@@ -207,4 +207,8 @@ git fetch origin --tags
 git switch --detach v0.2.0   # après publication de ce tag
 ```
 
-Ne déplacez pas un tag publié. Le numéro courant est aussi affiché dans le pied de page du site. Cette refonte ne crée pas automatiquement de tag ni de release GitHub.
+Ne déplacez pas un tag publié. Le numéro courant est aussi affiché dans le pied de page du site. La publication GitHub est une opération distincte du déploiement.
+
+### Publication automatique sur GitHub
+
+Le workflow `.github/workflows/release.yml` crée la release lorsque vous poussez un tag `vMAJEURE.MINEURE.CORRECTIF`. Il vérifie la correspondance avec `VERSION`, extrait la section correspondante de `RELEASE_NOTES.md` et publie les notes avec le jeton intégré de GitHub Actions. Une release existante est conservée. Le workflow peut aussi être relancé manuellement avec un tag existant depuis l’onglet Actions. GitHub Actions doit être activé sur le dépôt.

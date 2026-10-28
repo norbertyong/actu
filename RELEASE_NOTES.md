@@ -2,7 +2,7 @@
 
 ## Non publié
 
-## v0.2.0 — refonte (livraison préparée)
+## v0.2.0 — 28 octobre 2026
 
 ### Nouveautés
 
@@ -37,7 +37,7 @@
 - 94 contrôles fonctionnels réussis : 52 PHP, 12 collecte HTTP simulée et 30 parcours Chromium. Rapport détaillé : `docs/VALIDATION.md`.
 - L’accès réel aux sources, à NVD et aux canaux d’alerte dépend du réseau et des services configurés. Les fixtures ne prouvent pas leur disponibilité.
 - Le cron et les transports externes ne sont pas installés automatiquement. Les favoris restent locaux au navigateur.
-- Cette refonte ne crée pas automatiquement de tag ou de release GitHub et ne déploie pas le site.
+- La publication du tag et de la release est distincte du déploiement du site.
 
 ## v0.1.0 — 28 octobre 2026
 
