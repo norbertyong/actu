@@ -2,6 +2,10 @@
 
 ## Non publié
 
+### Documentation
+
+- Guide cPanel pas à pas : PHP, racine publique, configuration privée PHP-FPM/CLI, initialisation, cron, alertes, sauvegarde et dépannage.
+
 ## v0.2.0 — 28 octobre 2026
 
 ### Nouveautés
