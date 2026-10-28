@@ -1,6 +1,17 @@
 # Notes de version
 
-## Import initial — non publié
+## Non publié
+
+### Documentation
+
+- Description du cycle de collecte, du cache, de la déduplication et des filtres.
+- Guide des menus publics et administratifs, des paramètres d’URL et de la déconnexion.
+- Convention de versionnement, préparation des tags et distinction entre commit, release et déploiement.
+- Précision sur les fonctions annoncées mais non implémentées et l’incohérence du filtre par source des vulnérabilités.
+
+## Import initial — commit `3ab2db8`
+
+Code intégré à `main`, sans tag de version ni release GitHub.
 
 ### Ajouts
 
