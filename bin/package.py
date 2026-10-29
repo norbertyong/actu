@@ -30,7 +30,7 @@ for path in (root / 'public/assets').glob('*'):
 for folder in ['app', 'bin']:
     for path in (root / folder).glob('*.php'):
         files[f'.actu/{folder}/{path.name}'] = path.read_bytes()
-for name in ['VERSION', 'RELEASE_NOTES.md']:
+for name in ['VERSION', 'README.md', 'RELEASE_NOTES.md']:
     files['.actu/' + name] = (root / name).read_bytes()
 files['.htaccess'] = b'''DirectoryIndex index.php
 Require all granted
@@ -79,6 +79,10 @@ Sauvegarder avec les processus PHP/collecteurs arrêtés pour inclure un état S
 Ne pas utiliser ce paquet pour une première installation ou sur une ancienne disposition depuis les sources avec public/.
 Pour revenir en arrière : arrêter les écritures puis restaurer ensemble le code, la configuration et le stockage sauvegardés.
 '''.encode()
+required = {'settings.php', 'ai.php', 'dashboard.php', 'diagnostics.php', 'technologies.php', 'dossiers.php', '.actu/app/ai.php', '.actu/README.md'}
+if not required.issubset(files):
+    raise SystemExit('Paquet incomplet : ' + ', '.join(sorted(required - files.keys())))
+files['CONTENU.txt'] = ('Actu ' + version + '\n' + '\n'.join(sorted(files)) + '\n').encode()
 with zipfile.ZipFile(args.output, 'w', zipfile.ZIP_DEFLATED) as archive:
     for name, data in sorted(files.items()):
         info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))

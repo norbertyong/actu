@@ -2,6 +2,16 @@
 
 ## Non publié
 
+## v0.4.1 — 29 octobre 2026
+
+- Validation : 112 contrôles Apache réussis en racine et sous-dossier, incluant installation, mise à jour et paramètres IA.
+- Paquets cPanel complets reconstruits depuis le même tag que la release.
+- README embarqué dans le dossier privé et inventaire des fichiers `CONTENU.txt`.
+- Contrôle de présence des pages IA, diagnostics, technologies et dossiers avant création du ZIP.
+- Accès direct à Paramètres IA sur le tableau de bord administrateur.
+- Deux archives : première installation et mise à jour préservant configuration et données.
+
+
 ## v0.4.0 — 29 octobre 2026
 
 ### Veille personnalisée
