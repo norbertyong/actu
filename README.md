@@ -4,6 +4,20 @@
 
 **Sur cPanel :** utilisez l’[installation express](#installation-express--copier-ouvrir-configurer). Le [guide avancé](#installation-avancée-sur-cpanel-depuis-les-sources) reste disponible pour une installation manuelle depuis le code source.
 
+## Choisir le bon téléchargement
+
+| Votre situation | Archive et instructions |
+| --- | --- |
+| Première installation sur cPanel | [ZIP complet v0.4.0](https://github.com/norbertyong/actu/releases/download/v0.4.0/actu-cpanel-v0.4.0.zip), puis [installation express](#installation-express--copier-ouvrir-configurer). |
+| Site déjà installé avec le paquet cPanel 0.3.x ou 0.4.x | [ZIP de mise à jour v0.4.0](https://github.com/norbertyong/actu/releases/download/v0.4.0/actu-cpanel-update-v0.4.0.zip), puis [procédure de mise à jour](#mettre-à-jour-un-site-cpanel-existant-03x--04x). Sauvegarder le site avant extraction. |
+| Installation depuis les sources avec une racine `public/` | Code source de la [release v0.4.0](https://github.com/norbertyong/actu/releases/tag/v0.4.0), puis [guide avancé](#installation-avancée-sur-cpanel-depuis-les-sources). |
+
+La release contient les deux ZIP cPanel et leurs sommes SHA256. Publier une release ou pousser sur GitHub ne met pas automatiquement à jour votre hébergement : appliquez l’archive adaptée à votre installation.
+
+**Après la mise à jour :** ouvrez **À traiter → Mes technologies** pour personnaliser la veille, **Vulnérabilités → Regrouper par CVE** pour croiser les sources, et **Administration → Diagnostic** pour contrôler les collectes.
+
+**Pour Groq :** ouvrez **Administration → Paramètres IA**, renseignez votre clé, choisissez le modèle et activez l’IA. Sur un article, cliquez sur **Résumé IA → Générer le résumé**. Consultez le [guide Groq](#activer-les-résumés-ia-avec-groq) pour les quotas, la confidentialité et le dépannage. L’IA reste désactivée tant que vous ne l’activez pas.
+
 ## Installation express : copier, ouvrir, configurer
 
 **[Télécharger directement le ZIP prêt à installer](https://github.com/norbertyong/actu/releases/download/v0.4.0/actu-cpanel-v0.4.0.zip)** · [Somme SHA256](https://github.com/norbertyong/actu/releases/download/v0.4.0/actu-cpanel-v0.4.0.zip.sha256) · [Release v0.4.0](https://github.com/norbertyong/actu/releases/tag/v0.4.0)
