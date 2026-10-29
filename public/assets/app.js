@@ -59,3 +59,9 @@ collectForm?.addEventListener('submit', async (event) => {
   } catch (error) {status.textContent = error.message;}
   finally {button.disabled=false;}
 });
+
+// Normal POST retains the server-rendered error page when Groq is unavailable.
+document.querySelector('.ai-generate')?.addEventListener('submit', (event) => {
+  event.currentTarget.querySelector('button').disabled = true;
+  event.currentTarget.querySelector('.ai-progress').textContent = ' Génération en cours… (40 secondes maximum)';
+});

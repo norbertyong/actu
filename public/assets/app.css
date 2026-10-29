@@ -833,3 +833,12 @@ code {
 .status-dot.stale {
   background: var(--muted);
 }
+
+/* Watch dashboard and long model/source labels stay readable on mobile. */
+.stat { min-width: 0; }
+a.stat { text-decoration: none; color: inherit; }
+.ai-result, .source-card, .form-grid > div { overflow-wrap: anywhere; min-width: 0; }
+.badge.warning { background: var(--surface); color: var(--text); border: 1px solid currentColor; }
+.card-actions { flex-wrap: wrap; gap: 12px; }
+.subnav { flex-wrap: wrap; }
+.ai-progress { display: inline-block; padding-top: 8px; }

@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const assert = require('node:assert/strict');
+const evolution = require('./evolution-browser.cjs');
 const env = {...process.env};
 for (const key of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH']) delete env[key];
 const docker = (...args) => execFileSync('docker',['--host=unix:///var/run/docker.sock',...args],{env,encoding:'utf8',stdio:['pipe','pipe','pipe']});
@@ -23,6 +24,15 @@ with zipfile.ZipFile(sys.argv[1]) as z:
  for folder in [pathlib.Path(sys.argv[2]),pathlib.Path(sys.argv[2])/'veille']:z.extractall(folder)
 `,zip,path.join(temp,'site')]);
   check(true,'Archive sans configuration, clé ni données locales');
+  const updateZip=path.join(temp,'update.zip');
+  execFileSync('python3',['bin/package.py','--update','--output',updateZip],{stdio:'pipe'});
+  execFileSync('python3',['-c',`import zipfile,sys
+with zipfile.ZipFile(sys.argv[1]) as z:
+ assert not any(n.startswith(('.actu/config/','.actu/storage/')) for n in z.namelist())
+ assert '.actu/app/ai.php' in z.namelist()
+ z.extractall(sys.argv[2])
+`,updateZip,path.join(temp,'update')]);
+  check(true,'Paquet de mise à jour sans configuration, stockage ou activation installateur');
   docker('run','-d','--name',name,'-p','127.0.0.1::80','actu:apache-test');started=true;
   docker('cp',path.join(temp,'site')+'/.',name+':/var/www/html');
   docker('exec',name,'chown','-R','www-data:www-data','/var/www/html');
@@ -47,6 +57,16 @@ with zipfile.ZipFile(sys.argv[1]) as z:
    await page.getByRole('button',{name:'Récupérer les articles'}).click();await page.getByText('Collecte terminée. Vous pouvez consulter les actualités.',{exact:true}).waitFor();check(true,'Collecte web verrouillée et terminée sans réseau');
    await page.getByRole('link',{name:'Actualités',exact:true}).click();check(page.url()===base+'/index.php' && await page.locator('.article-card').count()===1,'Actualités et liens compatibles sous-dossier');
    await page.getByRole('button',{name:'Ajouter aux favoris'}).click();await page.getByRole('link',{name:'Favoris',exact:true}).click();check(page.url()===base+'/favorites.php' && await page.locator('.article-card').count()===1,'Formulaires et redirections des favoris');
+   // Simulate the pre-0.4 schema with real existing credentials, articles and favorites.
+   const snapshot=`echo hash('sha256',file_get_contents('${privateRoot}/config/local.php').json_encode(run('SELECT * FROM articles')->fetchAll()).json_encode(run('SELECT * FROM states')->fetchAll()));`;
+   const before=docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';${snapshot}db()->exec('DROP TABLE technologies; DROP TABLE ai_cache; DROP TABLE ai_usage');`);
+   docker('cp',path.join(temp,'update')+'/.',name+':/var/www/html'+prefix);
+   docker('exec',name,'chown','-R','www-data:www-data','/var/www/html'+prefix);
+   const after=docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';${snapshot}`);
+   check(before===after,'Mise à jour préserve identifiants, articles et favoris existants');
+   check(docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';echo run("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('technologies','ai_cache','ai_usage')")->fetchColumn();`)==='3','Migration additive crée les trois nouvelles tables');
+   check((await context.request.get(base+'/install.php')).status()===404,'Mise à jour ne réactive pas l’installateur');
+   await evolution({context,page,base,docker,name,privateRoot,check});
    await page.setViewportSize({width:390,height:844});check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Affichage mobile');
    await page.getByRole('button',{name:'Déconnexion',exact:true}).click();check(page.url()===base+'/login.php','Déconnexion du paquet');
    await context.close();

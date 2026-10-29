@@ -15,6 +15,8 @@ if (PHP_SAPI !== 'cli' && is_file(ROOT . '/config/install.enabled') && !is_file(
 date_default_timezone_set("Europe/Paris");
 require_once __DIR__ . "/core.php";
 require_once __DIR__ . "/feeds.php";
+require_once __DIR__ . "/watch.php";
+require_once __DIR__ . "/ai.php";
 if (PHP_SAPI !== "cli") {
     ini_set("display_errors", "0");
     set_exception_handler(function (Throwable $error): void {

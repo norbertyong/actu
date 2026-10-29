@@ -20,6 +20,7 @@ jobs:
           for file in app/*.php public/*.php bin/*.php tests/*.php; do php -l "$file" || exit 1; done
           php tests/run.php
           php tests/collector.php
+          php tests/evolution.php
       - name: Dépendances navigateur
         run: |
           npm ci --ignore-scripts

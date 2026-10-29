@@ -1,4 +1,23 @@
-# Validation de la refonte 0.2.0
+# Validation
+
+## Version 0.4.0 — 29 octobre 2026
+
+**250 contrôles fonctionnels réussis**, sur des bases temporaires sans données utilisateur :
+
+| Vérification | Résultat |
+| --- | --- |
+| `php tests/run.php` | 52 contrôles existants, tous réussis. |
+| `php tests/collector.php` | 12 contrôles HTTP via proxy local simulant les flux, tous réussis. |
+| `php tests/evolution.php` | 44 contrôles : technologies Unicode et isolation, filtres CVE, corrections éditoriales, fraîcheur, séparation CLI/web, contrat Groq simulé, cache, clé privée, budgets, erreurs, sorties non fiables et concurrence réelle de cinq processus sur le quota SQLite. |
+| `node tests/browser.cjs` | 30 parcours existants rejoués dans une installation isolée. |
+| `node tests/deployment.cjs` | 112 contrôles sur un vrai Apache, racine et `/veille` : installation, archive de mise à jour, migration additive depuis un schéma sans les nouvelles tables, conservation des identifiants/articles/favoris, nouveaux écrans, CSRF/authentification, confidentialité de la clé, affichage des réponses IA échappées, cache, quotas web, diagnostic CLI, effacement et mobile. |
+| Syntaxe | Tous les fichiers PHP, JavaScript modifiés et générateur Python vérifiés ; `git diff --check` réussi. |
+
+Le transport Groq est simulé dans les tests : **aucune clé utilisateur, aucun appel facturable et aucune réponse réelle de Groq**. Le contrat de requête/réponse et les parcours applicatifs sont couverts ; le compte, la disponibilité du modèle, TLS et la connectivité réelle vers `api.groq.com` restent à vérifier après configuration sur l’hébergement. Ce domaine n’est pas autorisé dans la politique réseau de l’environnement cloud courant.
+
+Les tests Apache utilisent le paquet de déploiement réel, mais ne constituent pas un déploiement sur le cPanel personnel de l’utilisateur. Aucun email ou webhook n’a été envoyé. La validation des flux externes reste soumise aux limites réseau décrites plus bas.
+
+## Historique : refonte 0.2.0
 
 Validation locale du code dans une image PHP 8.3 avec SQLite, cURL, SimpleXML et mbstring, exécutée sous `www-data`.
 

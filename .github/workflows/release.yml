@@ -48,7 +48,9 @@ jobs:
           Path(os.environ['RUNNER_TEMP'], 'release-notes.md').write_text(notes + '\n')
           PY
       - name: Construire le paquet cPanel
-        run: python3 bin/package.py --output "$RUNNER_TEMP/actu-cpanel-$RELEASE_TAG.zip"
+        run: |
+          python3 bin/package.py --output "$RUNNER_TEMP/actu-cpanel-$RELEASE_TAG.zip"
+          python3 bin/package.py --update --output "$RUNNER_TEMP/actu-cpanel-update-$RELEASE_TAG.zip"
       - name: Publier la release GitHub
         shell: bash
         run: |
@@ -60,4 +62,6 @@ jobs:
             --title "Actu Cyber & IT $RELEASE_TAG" \
             --notes-file "$RUNNER_TEMP/release-notes.md" \
             "$RUNNER_TEMP/actu-cpanel-$RELEASE_TAG.zip" \
-            "$RUNNER_TEMP/actu-cpanel-$RELEASE_TAG.zip.sha256"
+            "$RUNNER_TEMP/actu-cpanel-$RELEASE_TAG.zip.sha256" \
+            "$RUNNER_TEMP/actu-cpanel-update-$RELEASE_TAG.zip" \
+            "$RUNNER_TEMP/actu-cpanel-update-$RELEASE_TAG.zip.sha256"

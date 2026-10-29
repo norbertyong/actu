@@ -1,14 +1,14 @@
 # Actu Cyber & IT
 
-**Version 0.3.0 — paquet cPanel prêt à installer.** Agrégateur PHP de veille cybersécurité, informatique et Linux, avec historique SQLite, favoris, recherches enregistrées, gestion des sources et alertes. Voir les [notes de version](RELEASE_NOTES.md).
+**Version 0.4.0 — veille personnalisée et résumés IA avec Groq.** Agrégateur PHP de veille cybersécurité, informatique et Linux, avec historique SQLite, favoris, recherches enregistrées, gestion des sources et alertes, tableau « À traiter », technologies suivies et dossiers CVE. Voir les [notes de version](RELEASE_NOTES.md).
 
 **Sur cPanel :** utilisez l’[installation express](#installation-express--copier-ouvrir-configurer). Le [guide avancé](#installation-avancée-sur-cpanel-depuis-les-sources) reste disponible pour une installation manuelle depuis le code source.
 
 ## Installation express : copier, ouvrir, configurer
 
-**[Télécharger directement le ZIP prêt à installer](https://github.com/norbertyong/actu/releases/download/v0.3.0/actu-cpanel-v0.3.0.zip)** · [Somme SHA256](https://github.com/norbertyong/actu/releases/download/v0.3.0/actu-cpanel-v0.3.0.zip.sha256) · [Release v0.3.0](https://github.com/norbertyong/actu/releases/tag/v0.3.0)
+**[Télécharger directement le ZIP prêt à installer](https://github.com/norbertyong/actu/releases/download/v0.4.0/actu-cpanel-v0.4.0.zip)** · [Somme SHA256](https://github.com/norbertyong/actu/releases/download/v0.4.0/actu-cpanel-v0.4.0.zip.sha256) · [Release v0.4.0](https://github.com/norbertyong/actu/releases/tag/v0.4.0)
 
-Choisissez **`actu-cpanel-v0.3.0.zip`**, et non « Source code (zip) » : le paquet a déjà la bonne disposition pour cPanel.
+Choisissez **`actu-cpanel-v0.4.0.zip`**, et non « Source code (zip) » : le paquet a déjà la bonne disposition pour cPanel.
 
 1. Dans cPanel, choisissez PHP 8.2+ avec `pdo_sqlite`, `curl`, `SimpleXML`, `mbstring` et `session`.
 2. Extrayez **tout le contenu** dans le répertoire du site (`public_html` pour un site dédié, ou `public_html/actu` pour un sous-dossier). Utilisez un dossier neuf ou sauvegardé. Gardez les fichiers cachés **`.htaccess` et `.actu/`** ; activez leur affichage dans le gestionnaire cPanel.
@@ -49,7 +49,7 @@ Dans **Tâches cron**, mettez `*/20` dans **Minute**, puis `*` dans les quatre a
 
 Pour un site installé directement dans `public_html`, retirez `/actu` du chemin. Le collecteur lit automatiquement la configuration créée par l’assistant. Les alertes email/webhook restent facultatives et désactivées tant que leurs destinations ne sont pas configurées.
 
-**Mises à jour :** le paquet ci-dessus est une archive de première installation. Sauvegardez configuration et base ; ne remplacez pas `.actu/config/` ou `.actu/storage/` par les dossiers d’une archive neuve et ne réintroduisez pas `install.enabled`. Ne supprimez pas la configuration pour « réinstaller » un site existant. Le guide cPanel avancé ci-dessous concerne l’archive de code source et la disposition séparée `public/`.
+**Mises à jour :** utilisez le [paquet de mise à jour dédié](#mettre-à-jour-un-site-cpanel-existant-03x--04x). Le paquet ci-dessus est une archive de première installation. Sauvegardez configuration et base ; ne remplacez pas `.actu/config/` ou `.actu/storage/` par les dossiers d’une archive neuve et ne réintroduisez pas `install.enabled`. Ne supprimez pas la configuration pour « réinstaller » un site existant. Le guide cPanel avancé ci-dessous concerne l’archive de code source et la disposition séparée `public/`.
 
 ### Si le démarrage bloque
 
@@ -64,6 +64,49 @@ Pour un site installé directement dans `public_html`, retirez `/actu` du chemin
 ### Construction du paquet pour les développeurs
 
 Pour produire le paquet depuis les sources : `python3 bin/package.py`. Le fichier ZIP et son SHA256 sont créés dans `dist/`, sans caches, base locale, identifiants ou fichiers utilisateur.
+
+## Mettre à jour un site cPanel existant (0.3.x → 0.4.x)
+
+**[Télécharger le ZIP de mise à jour v0.4.0](https://github.com/norbertyong/actu/releases/download/v0.4.0/actu-cpanel-update-v0.4.0.zip)** · [SHA256](https://github.com/norbertyong/actu/releases/download/v0.4.0/actu-cpanel-update-v0.4.0.zip.sha256)
+
+Ce ZIP convient à un site déjà installé avec le **paquet cPanel 0.3.x ou 0.4.x**, dont le code privé se trouve dans `.actu/`. Il ne contient ni configuration, ni stockage, ni marqueur d’activation de l’installateur.
+
+1. Suspendez le cron et mettez le site en maintenance depuis l’hébergement. Attendez la fin des collectes/générations en cours.
+2. Sauvegardez le dossier complet, en particulier `.actu/config/` et `.actu/storage/`. Pour une sauvegarde SQLite cohérente, arrêtez les écritures et conservez aussi les éventuels fichiers `-wal` et `-shm`.
+3. Envoyez **`actu-cpanel-update-v0.4.0.zip`** dans le dossier du site et extrayez son contenu en remplaçant les fichiers du code. Activez l’affichage des fichiers cachés. **Ne supprimez pas les dossiers existants.**
+4. Vérifiez que `.actu/config/local.php` et `.actu/storage/actu.sqlite` sont toujours présents. Leurs contenus sont conservés ; les nouvelles tables sont créées automatiquement au premier accès.
+5. Rouvrez le site, connectez-vous et vérifiez **À traiter**, **Vulnérabilités → Regrouper par CVE** et **Administration → Diagnostic**. Réactivez le cron.
+6. Configurez Groq ci-dessous si vous souhaitez activer l’IA.
+
+Pour revenir en arrière, arrêtez les écritures puis restaurez ensemble le code, la configuration et le stockage sauvegardés. Pour une installation **depuis les sources** avec `public/`, mettez à jour le code source en conservant le stockage et la configuration privés ; n’appliquez pas le ZIP cPanel à cette disposition.
+
+## Activer les résumés IA avec Groq
+
+L’IA est facultative et désactivée par défaut. Elle fonctionne avec une clé de votre compte Groq et les connexions HTTPS sortantes vers **`api.groq.com`**. Aucun SDK ou service supplémentaire n’est à installer sur cPanel.
+
+1. Ouvrez le site en **HTTPS** et connectez-vous à **Administration**.
+2. Ouvrez **Paramètres IA**, puis collez votre clé dans **Nouvelle clé API Groq**. Ne la mettez pas dans Git, une URL ou une capture d’écran.
+3. Renseignez un identifiant de modèle de conversation compatible avec le format JSON et disponible sur votre compte. La valeur proposée est `llama-3.3-70b-versatile` ; modifiez-la si sa disponibilité change chez Groq.
+4. Ajustez les limites : par défaut **20 tentatives par jour** et **100 000 unités prudentes**. Cochez **Activer les résumés Groq**, puis enregistrez.
+5. Dans **Actualités** ou **À traiter**, ouvrez **Résumé IA** sur un article, puis cliquez sur **Générer le résumé**. Cette première génération vérifie aussi la connexion au fournisseur.
+6. Consultez le résumé français, les produits et actions mentionnés, les informations manquantes et le lien vers la source originale.
+
+### Données, cache et consommation
+
+- Les demandes passent uniquement par le serveur PHP vers l’API de conversation Groq, sans redirection HTTP ni outils exécutables. La clé est conservée dans `ACTU_STORAGE/groq.json` (par défaut `.actu/storage/groq.json` pour le paquet cPanel), avec permissions `0600`. Elle n’est jamais réaffichée dans les formulaires, ajoutée au prompt ou incluse dans les archives de livraison. Le fichier est privé mais **non chiffré** : protégez également les sauvegardes et l’accès à l’hébergement.
+- Une variable serveur `ACTU_GROQ_API_KEY`, si renseignée, est prioritaire et n’est jamais recopiée dans ce fichier. Supprimer la clé locale ne supprime pas une variable serveur.
+- Seuls le **titre (400 caractères maximum) et l’extrait RSS (6 000 maximum)** sont transmis à Groq à la demande d’un administrateur. Aucun téléchargement de l’article complet, envoi des technologies suivies ou traitement IA automatique pendant la collecte.
+- Le résultat est consultable par les administrateurs et mis en cache localement. À texte et modèle identiques, rouvrir le résumé ne déclenche aucun appel. Changer le texte ou le modèle demande une nouvelle génération. **Supprimer les résumés IA** efface le cache ; cela ne rembourse pas les requêtes déjà envoyées.
+- Les quotas sont communs à l’installation, réservés avant chaque appel et remis à zéro à **minuit UTC**. Les échecs comptent aussi ; aucune relance automatique. Le budget prudent utilise la taille en octets de la requête et une marge pour la sortie : ce n’est ni la consommation exacte en tokens, ni une limite monétaire. Consultez les tarifs, quotas et factures de votre compte Groq.
+- Les résumés peuvent contenir des erreurs et se fondent sur un extrait. Le site ne remplace pas les avis des éditeurs et ne transforme pas une suggestion IA en commande exécutée.
+
+| Message / problème | Vérification |
+| --- | --- |
+| Accès Groq refusé | Clé valide, autorisations du compte et éventuelle variable serveur prioritaire. |
+| Modèle ou format refusé | Identifiant exact et prise en charge du mode JSON par le modèle choisi. |
+| Groq injoignable | cURL, DNS, certificats et autorisation HTTPS sortante vers `api.groq.com` chez l’hébergeur. |
+| Limite Groq ou quota quotidien atteint | Quota fournisseur ou limites locales dans Paramètres IA ; attendre ou ajuster selon votre budget. |
+| Réponse incomplète / non structurée | Aucun faux résumé n’est sauvegardé ; vérifier le modèle puis réessayer manuellement. |
 
 ## Démarrage depuis les sources (développement)
 
@@ -108,7 +151,7 @@ Dans le cloud avec proxy, préparez l’image via la commande `docker build --se
 
 ## Installation avancée sur cPanel depuis les sources
 
-Cette méthode manuelle reste disponible pour le code source v0.3.0, avec une racine web `public/` distincte. Pour copier l’archive prête à installer, suivez uniquement l’installation express ci-dessus.
+Cette méthode manuelle reste disponible pour le code source v0.4.0, avec une racine web `public/` distincte. Pour copier l’archive prête à installer, suivez uniquement l’installation express ci-dessus.
 
 Cette procédure installe **le code source sans Docker** sur un hébergement cPanel avec Apache/LiteSpeed et PHP-FPM/CGI. Les noms de menus peuvent varier selon l’hébergeur. Aucun MySQL, Node.js, Composer ou accès root n’est nécessaire.
 
@@ -134,9 +177,9 @@ Ne créez pas de base MySQL dans cPanel : SQLite est initialisé automatiquement
 
 ### Étape 2 — Télécharger et extraire la release
 
-1. Ouvrez [la release v0.2.0](https://github.com/norbertyong/actu/releases/tag/v0.2.0), puis téléchargez **Source code (zip)** dans **Assets**.
+1. Ouvrez [la release v0.4.0](https://github.com/norbertyong/actu/releases/tag/v0.4.0), puis téléchargez **Source code (zip)** dans **Assets**.
 2. Dans **Fichiers → Gestionnaire de fichiers**, ouvrez votre répertoire personnel `/home/CPUSER`, puis envoyez l’archive.
-3. Extrayez-la. GitHub crée normalement un dossier `actu-0.2.0` ; renommez-le en `actu` si ce nom est libre. Ne remplacez pas une installation existante sans sauvegarde.
+3. Extrayez-la. GitHub crée normalement un dossier `actu-0.4.0` ; renommez-le en `actu` si ce nom est libre. Ne remplacez pas une installation existante sans sauvegarde.
 4. Dans les paramètres du gestionnaire, activez **Afficher les fichiers masqués / Show Hidden Files** et vérifiez la présence des fichiers `.htaccess` à la racine et dans `public/`.
 
 L’arborescence attendue est :
@@ -172,7 +215,7 @@ Certaines interfaces demandent seulement `actu/public`, relatif au répertoire p
 
 Le DocumentRoot du **domaine principal** n’est généralement pas modifiable depuis cPanel, et certaines offres imposent tous les domaines sous `public_html`. Dans ce cas, utilisez un sous-domaine dont la racine est configurable ou demandez à l’hébergeur de pointer le domaine vers `actu/public`. Si le panneau interdit un dossier hors de `public_html`, faites valider une disposition sûre par l’hébergeur ; ne rendez pas les dossiers `app/`, `bin/` ou `storage/` accessibles pour contourner la restriction. Cette procédure suppose cette racine publique correctement configurée.
 
-Le paquet prêt à installer v0.3.0 prend également en charge les sous-dossiers. La procédure avancée ci-dessous conserve la disposition de développement avec une racine `public/` distincte.
+Le paquet prêt à installer v0.4.0 prend également en charge les sous-dossiers. La procédure avancée ci-dessous conserve la disposition de développement avec une racine `public/` distincte.
 
 ### Étape 4 — Activer HTTPS
 
@@ -230,7 +273,7 @@ if ($config === false) {
 }
 $allowed = [
     'ACTU_STORAGE', 'ACTU_ADMIN_USER', 'ACTU_ADMIN_PASSWORD_HASH',
-    'ACTU_HTTPS', 'ACTU_ALERT_WEBHOOK', 'ACTU_ALERT_EMAIL', 'ACTU_MAIL_FROM',
+    'ACTU_HTTPS', 'ACTU_GROQ_API_KEY', 'ACTU_ALERT_WEBHOOK', 'ACTU_ALERT_EMAIL', 'ACTU_MAIL_FROM',
 ];
 foreach ($allowed as $name) {
     if (isset($config[$name]) && is_string($config[$name])) {
@@ -351,7 +394,7 @@ Ajoutez `--send` uniquement lorsque vous souhaitez effectivement envoyer les not
 | Modifications `.user.ini` sans effet | Attendre le délai de cache, vérifier le handler PHP du domaine et demander un rechargement/configuration du pool si nécessaire. |
 | Erreur de session ou formulaire expiré | Vérifier `session.save_path`, l’accès en écriture des sessions, les cookies et HTTPS ; ne forcer `ACTU_HTTPS=1` que pour un vrai accès HTTPS. |
 
-Ces instructions sont adaptées au code v0.2.0. L’installation cPanel réelle dépend des fonctions et limites de votre hébergeur ; elle n’a pas été exécutée sur votre compte depuis cet environnement.
+Ces instructions sont adaptées au code v0.4.0. L’installation cPanel réelle dépend des fonctions et limites de votre hébergeur ; elle n’a pas été exécutée sur votre compte depuis cet environnement.
 
 ## Connexion administrateur
 
@@ -372,11 +415,14 @@ L’accès se fait par **Administration**. Après cinq échecs depuis la même a
 
 | Menu | Fonctionnement |
 | --- | --- |
+| **À traiter** | Articles non lus des 7 derniers jours, priorité KEV ou CVSS ≥ 9 ; sélection des technologies suivies. |
+| **Mes technologies** (depuis À traiter) | Jusqu’à 30 produits ou expressions propres au navigateur. |
+| **Dossiers CVE** (depuis Vulnérabilités) | Publications regroupées par identifiant CVE, nombre de sources et accès aux originaux. |
 | **Actualités** | Historique des articles, tri du plus récent au plus ancien. |
 | **Vulnérabilités** | Articles de catégorie `vulprod` ou contenant une CVE ; filtre exploitation connue via CISA KEV. |
 | **Favoris** | Articles enregistrés sur ce navigateur. |
 | **Sources** | État, dernier succès de collecte et nombre d’articles conservés par source. |
-| **Administration** | Tableau de bord, gestion des sources, alertes, statistiques et déconnexion. |
+| **Administration** | Tableau de bord, gestion des sources, alertes, statistiques, **Diagnostic**, **Paramètres IA** et déconnexion. |
 | **Thème** | Alterne automatique, clair et sombre ; choix mémorisé localement. |
 | **Versions** / **Confidentialité** | Notes de livraison et gestion des données personnelles, en pied de page. |
 
@@ -390,9 +436,11 @@ L’accès se fait par **Administration**. Après cinq échecs depuis la même a
 - Exporter les résultats en CSV ou RSS (1000 articles maximum par export). Le CSV neutralise les préfixes de formule.
 - Ouvrir le titre pour lire l’article complet chez son éditeur, dans un nouvel onglet.
 
-Les favoris, états de lecture et recherches sont associés à un cookie aléatoire propre au navigateur, sans compte lecteur. Ils ne sont pas synchronisés entre appareils. Les flux exportés dont le filtre dépend de ces préférences nécessitent ce cookie ; utilisez un filtre public pour un abonnement dans un lecteur RSS externe. La page **Confidentialité** permet d’effacer les données de lecture.
+Les favoris, états de lecture, technologies suivies et recherches sont associés à un cookie aléatoire propre au navigateur, sans compte lecteur. Ils ne sont pas synchronisés entre appareils. Les flux exportés dont le filtre dépend de ces préférences nécessitent ce cookie ; utilisez un filtre public pour un abonnement dans un lecteur RSS externe. La page **Confidentialité** permet d’effacer les données de lecture.
 
 ## Comment fonctionne la collecte
+
+Le menu **Administration → Diagnostic** distingue les sources en erreur, les collectes sans succès depuis une heure et les flux sans publication depuis sept jours. Une source peu active peut être silencieuse sans être défaillante. Le dernier début/fin de collecteur CLI et la dernière demande web sont affichés séparément : un passage CLI récent indique une exécution, sans prouver à lui seul que le cron cPanel est configuré.
 
 1. `bin/collect.php` prend un verrou exclusif et charge les sources actives depuis SQLite.
 2. Il ignore les sources vérifiées depuis moins de 20 minutes (sauf `--force`).
@@ -484,6 +532,7 @@ Les anciens caches XML, journaux visiteurs et `feeds.php` ne sont pas migrés au
 | `ACTU_ADMIN_USER` | Utilisateur administrateur, obligatoire pour se connecter. |
 | `ACTU_ADMIN_PASSWORD_HASH` | Empreinte du mot de passe, recommandée. |
 | `ACTU_ADMIN_PASSWORD` | Alternative de compatibilité ; ne pas versionner sa valeur. |
+| `ACTU_GROQ_API_KEY` | Clé Groq facultative côté serveur, prioritaire sur la clé saisie dans l’administration ; activer l’IA dans Paramètres IA reste nécessaire. |
 | `ACTU_HTTPS=1` | Seulement si un proxy de confiance termine HTTPS avant PHP ; active les cookies Secure et HSTS. |
 
 Les données privées sont hors de `public/`. Le site utilise des requêtes SQL préparées, une politique CSP, des protections CSRF et des cookies HttpOnly/SameSite. Ne faites pas confiance à un en-tête HTTPS fourni directement par le client. Sauvegardez SQLite avec son API de backup ou arrêtez les écritures avant de copier la base et ses fichiers WAL ; une copie du seul fichier principal à chaud n’est pas une sauvegarde fiable.
@@ -499,6 +548,7 @@ Résultats et limites de la validation locale : [docs/VALIDATION.md](docs/VALIDA
 ```sh
 php tests/run.php
 php tests/collector.php
+php tests/evolution.php
 for file in app/*.php public/*.php bin/*.php tests/*.php; do php -l "$file" || exit 1; done
 ```
 
@@ -514,11 +564,11 @@ Avant livraison : mettre à jour `VERSION`, ce README et `RELEASE_NOTES.md`, ex�
 
 ```sh
 git fetch origin --tags
-git switch --detach v0.2.0   # après publication de ce tag
+git switch --detach v0.4.0   # après publication de ce tag
 ```
 
 Ne déplacez pas un tag publié. Le numéro courant est aussi affiché dans le pied de page du site. La publication GitHub est une opération distincte du déploiement.
 
 ### Publication automatique sur GitHub
 
-Le workflow `.github/workflows/release.yml` crée la release lorsque vous poussez un tag `vMAJEURE.MINEURE.CORRECTIF`. Il vérifie la correspondance avec `VERSION`, extrait la section correspondante de `RELEASE_NOTES.md` et publie les notes avec le jeton intégré de GitHub Actions. Une release existante est conservée. Le workflow peut aussi être relancé manuellement avec un tag existant depuis l’onglet Actions. GitHub Actions doit être activé sur le dépôt.
+Le workflow `.github/workflows/release.yml` crée la release lorsque vous poussez un tag `vMAJEURE.MINEURE.CORRECTIF`. Il vérifie la correspondance avec `VERSION`, extrait la section correspondante de `RELEASE_NOTES.md` et publie les notes avec le jeton intégré de GitHub Actions. Les archives cPanel de première installation et de mise à jour ainsi que leurs SHA256 sont jointes à la release. Une release existante est conservée. Le workflow peut aussi être relancé manuellement avec un tag existant depuis l’onglet Actions. GitHub Actions doit être activé sur le dépôt.

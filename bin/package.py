@@ -11,8 +11,11 @@ version = (root / 'VERSION').read_text().strip()
 if not re.fullmatch(r'\d+\.\d+\.\d+', version):
     raise SystemExit('Invalid VERSION')
 parser = argparse.ArgumentParser()
-parser.add_argument('--output', type=Path, default=root / 'dist' / f'actu-cpanel-v{version}.zip')
+parser.add_argument('--output', type=Path)
+parser.add_argument('--update', action='store_true', help='Omit config/storage and installer activation for an existing site')
 args = parser.parse_args()
+if args.output is None:
+    args.output = root / 'dist' / f'actu-cpanel-{"update-" if args.update else ""}v{version}.zip'
 args.output.parent.mkdir(parents=True, exist_ok=True)
 files = {}
 for path in (root / 'public').glob('*.php'):
@@ -60,6 +63,21 @@ Pour les mises à jour : sauvegarder, ne pas écraser .actu/config ni .actu/stor
 Pour une mise à jour automatique hors connexion des visiteurs, ajouter une tâche cron cPanel toutes les 20 minutes :
 /CHEMIN/DU/PHP /home/COMPTE/public_html/actu/.actu/bin/collect.php
 Adapter les chemins. Sans cron, la collecte peut être lancée depuis l’administration.
+'''.encode()
+if args.update:
+    files = {name: data for name, data in files.items() if not name.startswith(('.actu/config/', '.actu/storage/'))}
+    files['INSTALLATION.txt'] = '''ACTU CYBER & IT — MISE À JOUR DEPUIS LE PAQUET CPANEL 0.3.x OU 0.4.x
+
+1. Mettre le site en maintenance depuis l’hébergement et suspendre le cron.
+2. Sauvegarder le dossier complet du site (notamment .actu/config et .actu/storage).
+3. Extraire TOUT le contenu de cette archive par-dessus le dossier existant, fichiers cachés inclus, en remplaçant les fichiers du code.
+4. Conserver impérativement .actu/config et .actu/storage : cette archive ne les contient pas et n’active pas l’installateur.
+5. Rouvrir le site, vérifier Sources et Diagnostic, réactiver le cron. Les nouvelles tables SQLite sont créées automatiquement.
+6. Pour Groq : Administration → Paramètres IA. Saisir votre clé privée, choisir un modèle compatible JSON et activer l’IA. La clé reste sur le serveur.
+
+Sauvegarder avec les processus PHP/collecteurs arrêtés pour inclure un état SQLite cohérent (base et éventuels fichiers -wal/-shm).
+Ne pas utiliser ce paquet pour une première installation ou sur une ancienne disposition depuis les sources avec public/.
+Pour revenir en arrière : arrêter les écritures puis restaurer ensemble le code, la configuration et le stockage sauvegardés.
 '''.encode()
 with zipfile.ZipFile(args.output, 'w', zipfile.ZIP_DEFLATED) as archive:
     for name, data in sorted(files.items()):

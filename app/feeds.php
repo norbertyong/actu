@@ -360,6 +360,7 @@ function save_article(int $source, array $item): int
         $item["title"] . " " . $item["summary"],
         $matches,
     );
+    run('DELETE FROM article_cves WHERE article_id=?', [$id]);
     foreach (array_unique($matches[0]) as $cve) {
         $cve = strtoupper($cve);
         run("INSERT OR IGNORE INTO cves(id) VALUES(?)", [$cve]);

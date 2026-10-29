@@ -2,6 +2,35 @@
 
 ## Non publié
 
+## v0.4.0 — 29 octobre 2026
+
+### Veille personnalisée
+
+- Tableau « À traiter » : articles non lus des sept derniers jours, priorité aux mentions de CVE KEV ou CVSS ≥ 9, liens vers tous les résultats et alertes récentes pour l’administrateur.
+- Jusqu’à 30 technologies suivies par navigateur ; filtre partagé entre actualités, vulnérabilités, dossiers, exports et recherches enregistrées. Correspondance textuelle Unicode sur titres/extraits et produits KEV, sans prétendre établir la vulnérabilité d’une version installée.
+- Dossiers CVE : regroupement des publications par identifiant, nombre d’articles et de sources, conservation des originaux et pagination. Les références retirées lors d’une correction éditoriale quittent le dossier.
+- Diagnostic des collectes : erreurs, retards, publications anciennes et historique du dernier passage CLI distinct des demandes web.
+
+### Assistant IA Groq
+
+- Configuration administrateur : clé privée, modèle de conversation compatible JSON, activation facultative et limites quotidiennes.
+- Résumé en français à la demande, produits et actions mentionnés dans l’extrait, informations manquantes et lien vers la publication originale. Aucun appel IA automatique à la collecte ou à la simple consultation.
+- Appels HTTPS côté serveur à destination fixe, réponses bornées et validées, affichage échappé et protection administrateur/CSRF.
+- Cache par article/texte/modèle, verrou contre les générations simultanées et quotas atomiques en SQLite ; les échecs comptent aussi. Le budget en unités prudentes n’est pas une facturation exacte ni un plafond monétaire.
+- Clé stockée dans le dossier privé avec permissions 0600, jamais renvoyée au navigateur. Variable serveur `ACTU_GROQ_API_KEY` prioritaire ; aucun secret inclus dans les archives.
+
+### Installation et mise à jour
+
+- Deux ZIP cPanel : première installation et mise à jour, chacun avec SHA256. Le ZIP de mise à jour exclut configuration, stockage et activation de l’installateur.
+- Évolution SQLite additive et automatique ; conservation des articles, favoris et identifiants existants. Sauvegarde complète avant remplacement du code.
+- README enrichi : activation Groq, menus, confidentialité, budgets, dépannage et mise à jour pas à pas.
+
+### Validation et limites
+
+- 250 contrôles réussis : 52 PHP existants, 12 collecte HTTP, 44 évolutions/Groq simulé, 30 parcours navigateur et 112 contrôles Apache/installation/mise à jour. Résultats détaillés dans `docs/VALIDATION.md`.
+- Aucun appel à un compte Groq réel : aucune clé utilisateur n’a été fournie et `api.groq.com` n’est pas autorisé par la politique réseau de cet environnement cloud. La première génération sur l’hébergement validera le compte, le modèle et la connectivité réels.
+- Cette livraison couvre les évolutions prioritaires proposées. EPSS, comptes lecteurs multiappareils, PWA, digest et workflow de remédiation restent des pistes ultérieures.
+
 ## v0.3.0 — 28 octobre 2026
 
 ### Installation prête pour cPanel

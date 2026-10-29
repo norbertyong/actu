@@ -56,6 +56,11 @@ function db(): PDO
         CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY, rule_id INTEGER NOT NULL REFERENCES rules(id) ON DELETE CASCADE, article_id INTEGER NOT NULL REFERENCES articles(id) ON DELETE CASCADE, created INTEGER NOT NULL, delivered INTEGER NOT NULL DEFAULT 0, UNIQUE(rule_id,article_id));
         CREATE TABLE IF NOT EXISTS deliveries (notification_id INTEGER NOT NULL REFERENCES notifications(id) ON DELETE CASCADE, channel TEXT NOT NULL, delivered INTEGER NOT NULL, PRIMARY KEY(notification_id,channel));
         CREATE TABLE IF NOT EXISTS settings (name TEXT PRIMARY KEY, value TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS technologies (id INTEGER PRIMARY KEY, reader TEXT NOT NULL, name TEXT NOT NULL, UNIQUE(reader,name));
+        CREATE TABLE IF NOT EXISTS ai_cache (article_id INTEGER PRIMARY KEY REFERENCES articles(id) ON DELETE CASCADE, fingerprint TEXT NOT NULL, model TEXT NOT NULL, result TEXT NOT NULL, created INTEGER NOT NULL);
+        CREATE TABLE IF NOT EXISTS ai_usage (day TEXT PRIMARY KEY, requests INTEGER NOT NULL DEFAULT 0, reserved_tokens INTEGER NOT NULL DEFAULT 0);
+        CREATE INDEX IF NOT EXISTS article_cves_cve ON article_cves(cve_id,article_id);
+        CREATE INDEX IF NOT EXISTS articles_source ON articles(source_id,published);
         SQL
         ,
     );
@@ -182,6 +187,8 @@ function filters(): array
         "period" => $period,
         "unread" => input("unread") === "1" ? "1" : "",
         "kev" => input("kev") === "1" ? "1" : "",
+        "tracked" => input("tracked") === "1" ? "1" : "",
+        "cve" => preg_match('/^CVE-\d{4}-\d{4,}$/D', strtoupper(input('cve'))) ? strtoupper(input('cve')) : '',
     ];
 }
 function article_query(
@@ -192,6 +199,14 @@ function article_query(
 ): array {
     $where = ["1=1"];
     $params = [$reader];
+    if (($f['tracked'] ?? '') === '1') {
+        $where[] = technology_match_sql();
+        $params[] = $reader;
+    }
+    if (($f['cve'] ?? '') !== '') {
+        $where[] = 'EXISTS(SELECT 1 FROM article_cves ac WHERE ac.article_id=a.id AND ac.cve_id=?)';
+        $params[] = $f['cve'];
+    }
     if ($f["q"] !== "") {
         $where[] =
             "(actu_lower(a.title) LIKE ? ESCAPE '\\' OR actu_lower(a.summary) LIKE ? ESCAPE '\\')";

@@ -11,6 +11,7 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
     fwrite(STDERR, "Collecte déjà en cours.\n");
     exit(2);
 }
+collector_event('started', (string)time());
 $sql = "SELECT * FROM sources WHERE enabled=1";
 $args = [];
 if (isset($options["source"])) {
@@ -36,6 +37,8 @@ foreach ($sources as $s) {
 $notifications = generate_notifications();
 echo $notifications . " nouvelles notifications.\n";
 run("DELETE FROM visits WHERE day < ?", [date("Y-m-d", time() - 90 * 86400)]);
+collector_event('completed', (string)time());
+collector_event('errors', (string)$errors);
 flock($lock, LOCK_UN);
 fclose($lock);
 exit($errors ? 1 : 0);
