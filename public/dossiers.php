@@ -16,6 +16,6 @@ filters_form($f, true);
 <article class="article-card"><div class="card-meta"><span class="badge <?=$group['exploited']?'danger':''?>"><?=$group['exploited']?'Exploitation connue · KEV':'Exploitation non renseignée'?></span><span class="badge"><?=$group['cvss']!==null?'CVSS '.e($group['cvss']):'CVSS non renseigné'?></span></div>
 <h2><a href="<?=e(base_path())?>/vulprod.php?<?=e(http_build_query(array_merge($f,['cve'=>$group['id']])))?>"><?=e($group['id'])?></a></h2><p><?=e(trim($group['vendor'].' '.$group['product']) ?: 'Produit non renseigné')?></p><p><?=$group['articles']?> article(s) · <?=$group['sources']?> source(s)</p><p class="muted">Dernière publication : <?=e(when((int)$group['latest']))?></p>
 <?php if ($group['action']): ?><p>Action indiquée par CISA : <?=e($group['action'])?></p><?php endif ?>
-</article><?php endforeach ?></div>
+<?php if(is_admin()):?><p><a class="button secondary" href="<?=e(base_path())?>/cve.php?id=<?=e($group['id'])?>">Ouvrir la fiche de suivi</a></p><?php endif ?></article><?php endforeach ?></div>
 <?php if ($pages>1): ?><nav class="pagination" aria-label="Pagination"><?php if ($page>1): ?><a href="?<?=e(http_build_query(array_merge($f,['page'=>$page-1])))?>">← Précédent</a><?php endif ?><?php if ($page<$pages): ?><a href="?<?=e(http_build_query(array_merge($f,['page'=>$page+1])))?>">Suivant →</a><?php endif ?></nav><?php endif ?>
 <?php page_end();

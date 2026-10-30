@@ -842,3 +842,22 @@ a.stat { text-decoration: none; color: inherit; }
 .card-actions { flex-wrap: wrap; gap: 12px; }
 .subnav { flex-wrap: wrap; }
 .ai-progress { display: inline-block; padding-top: 8px; }
+
+/* Private CVE workflow: long technical notes and small screens. */
+.case-form textarea { display: block; width: 100%; min-height: 90px; resize: vertical; font: inherit; padding: 12px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+.case-form small { display: block; color: var(--muted); margin-top: 6px; }
+.case-form button { margin-top: 12px; }
+.full-width, .case-filters .filter-bottom { grid-column: 1 / -1; }
+.case-filters { grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); }
+.case-badges { display: flex; flex-wrap: wrap; gap: 7px; }
+.case-table table { min-width: 850px; }
+.case-table td:first-child { min-width: 180px; }
+.case-form > div, .case-event, .case-changes dd, .case-publications { min-width: 0; overflow-wrap: anywhere; }
+.case-changes { display: grid; grid-template-columns: minmax(100px,1fr) minmax(0,3fr); gap: 10px; }
+.case-changes dd { margin: 0; }
+.case-event { border-top: 1px solid var(--line); padding: 20px 0; }
+.case-publications li { margin-bottom: 24px; }
+.preserve-lines { white-space: pre-wrap; overflow-wrap: anywhere; }
+.case-review { border-left: 4px solid var(--accent); }
+.panel[id] { scroll-margin-top: 24px; }
+@media(max-width:600px) { .case-changes { grid-template-columns: 1fr; } .case-changes dt { font-weight: bold; } .case-filters { grid-template-columns: 1fr; } }

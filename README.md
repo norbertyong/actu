@@ -1,6 +1,6 @@
 # Actu Cyber & IT
 
-**Version 0.4.1 — veille personnalisée et résumés IA avec Groq.** Agrégateur PHP de veille cybersécurité, informatique et Linux, avec historique SQLite, favoris, recherches enregistrées, gestion des sources et alertes, tableau « À traiter », technologies suivies et dossiers CVE. Voir les [notes de version](RELEASE_NOTES.md).
+**Version 0.5.0 — suivi opérationnel des CVE.** Agrégateur PHP de veille cybersécurité, informatique et Linux, avec historique SQLite, favoris, recherches enregistrées, gestion des sources et alertes, tableau « À traiter », technologies suivies et suivi des CVE avec décisions, responsables, échéances et historique. Voir les [notes de version](RELEASE_NOTES.md).
 
 **Sur cPanel :** utilisez l’[installation express](#installation-express--copier-ouvrir-configurer). Le [guide avancé](#installation-avancée-sur-cpanel-depuis-les-sources) reste disponible pour une installation manuelle depuis le code source.
 
@@ -10,11 +10,13 @@ Le paquet contient toutes les pages du site, les ressources, le moteur IA, les c
 
 | Votre situation | Archive et instructions |
 | --- | --- |
-| Première installation sur cPanel | [ZIP complet v0.4.1](https://github.com/norbertyong/actu/releases/download/v0.4.1/actu-cpanel-v0.4.1.zip), puis [installation express](#installation-express--copier-ouvrir-configurer). |
-| Site déjà installé avec le paquet cPanel 0.3.x ou 0.4.x | [ZIP de mise à jour v0.4.1](https://github.com/norbertyong/actu/releases/download/v0.4.1/actu-cpanel-update-v0.4.1.zip), puis [procédure de mise à jour](#mettre-à-jour-un-site-cpanel-existant-03x--04x). Sauvegarder le site avant extraction. |
-| Installation depuis les sources avec une racine `public/` | Code source de la [release v0.4.1](https://github.com/norbertyong/actu/releases/tag/v0.4.1), puis [guide avancé](#installation-avancée-sur-cpanel-depuis-les-sources). |
+| Première installation sur cPanel | [ZIP complet v0.5.0](https://github.com/norbertyong/actu/releases/download/v0.5.0/actu-cpanel-v0.5.0.zip), puis [installation express](#installation-express--copier-ouvrir-configurer). |
+| Site déjà installé avec le paquet cPanel 0.3.x, 0.4.x ou 0.5.x | [ZIP de mise à jour v0.5.0](https://github.com/norbertyong/actu/releases/download/v0.5.0/actu-cpanel-update-v0.5.0.zip), puis [procédure de mise à jour](#mettre-à-jour-un-site-cpanel-existant-03x--04x--05x). Sauvegarder le site avant extraction. |
+| Installation depuis les sources avec une racine `public/` | Code source de la [release v0.5.0](https://github.com/norbertyong/actu/releases/tag/v0.5.0), puis [guide avancé](#installation-avancée-sur-cpanel-depuis-les-sources). |
 
 La release contient les deux ZIP cPanel et leurs sommes SHA256. Publier une release ou pousser sur GitHub ne met pas automatiquement à jour votre hébergement : appliquez l’archive adaptée à votre installation.
+
+**Suivi CVE :** ouvrez **Administration → Suivi des CVE**, ou `tracking.php` dans le dossier du site. Consultez le [guide du module](#suivi-opérationnel-des-cve).
 
 **Après la mise à jour :** ouvrez **À traiter → Mes technologies** pour personnaliser la veille, **Vulnérabilités → Regrouper par CVE** pour croiser les sources, et **Administration → Diagnostic** pour contrôler les collectes.
 
@@ -22,9 +24,9 @@ La release contient les deux ZIP cPanel et leurs sommes SHA256. Publier une rele
 
 ## Installation express : copier, ouvrir, configurer
 
-**[Télécharger directement le ZIP prêt à installer](https://github.com/norbertyong/actu/releases/download/v0.4.1/actu-cpanel-v0.4.1.zip)** · [Somme SHA256](https://github.com/norbertyong/actu/releases/download/v0.4.1/actu-cpanel-v0.4.1.zip.sha256) · [Release v0.4.1](https://github.com/norbertyong/actu/releases/tag/v0.4.1)
+**[Télécharger directement le ZIP prêt à installer](https://github.com/norbertyong/actu/releases/download/v0.5.0/actu-cpanel-v0.5.0.zip)** · [Somme SHA256](https://github.com/norbertyong/actu/releases/download/v0.5.0/actu-cpanel-v0.5.0.zip.sha256) · [Release v0.5.0](https://github.com/norbertyong/actu/releases/tag/v0.5.0)
 
-Choisissez **`actu-cpanel-v0.4.1.zip`**, et non « Source code (zip) » : le paquet a déjà la bonne disposition pour cPanel.
+Choisissez **`actu-cpanel-v0.5.0.zip`**, et non « Source code (zip) » : le paquet a déjà la bonne disposition pour cPanel.
 
 1. Dans cPanel, choisissez PHP 8.2+ avec `pdo_sqlite`, `curl`, `SimpleXML`, `mbstring` et `session`.
 2. Extrayez **tout le contenu** dans le répertoire du site (`public_html` pour un site dédié, ou `public_html/actu` pour un sous-dossier). Utilisez un dossier neuf ou sauvegardé. Gardez les fichiers cachés **`.htaccess` et `.actu/`** ; activez leur affichage dans le gestionnaire cPanel.
@@ -65,7 +67,7 @@ Dans **Tâches cron**, mettez `*/20` dans **Minute**, puis `*` dans les quatre a
 
 Pour un site installé directement dans `public_html`, retirez `/actu` du chemin. Le collecteur lit automatiquement la configuration créée par l’assistant. Les alertes email/webhook restent facultatives et désactivées tant que leurs destinations ne sont pas configurées.
 
-**Mises à jour :** utilisez le [paquet de mise à jour dédié](#mettre-à-jour-un-site-cpanel-existant-03x--04x). Le paquet ci-dessus est une archive de première installation. Sauvegardez configuration et base ; ne remplacez pas `.actu/config/` ou `.actu/storage/` par les dossiers d’une archive neuve et ne réintroduisez pas `install.enabled`. Ne supprimez pas la configuration pour « réinstaller » un site existant. Le guide cPanel avancé ci-dessous concerne l’archive de code source et la disposition séparée `public/`.
+**Mises à jour :** utilisez le [paquet de mise à jour dédié](#mettre-à-jour-un-site-cpanel-existant-03x--04x--05x). Le paquet ci-dessus est une archive de première installation. Sauvegardez configuration et base ; ne remplacez pas `.actu/config/` ou `.actu/storage/` par les dossiers d’une archive neuve et ne réintroduisez pas `install.enabled`. Ne supprimez pas la configuration pour « réinstaller » un site existant. Le guide cPanel avancé ci-dessous concerne l’archive de code source et la disposition séparée `public/`.
 
 ### Si le démarrage bloque
 
@@ -81,20 +83,76 @@ Pour un site installé directement dans `public_html`, retirez `/actu` du chemin
 
 Pour produire le paquet depuis les sources : `python3 bin/package.py`. Le fichier ZIP et son SHA256 sont créés dans `dist/`, sans caches, base locale, identifiants ou fichiers utilisateur.
 
-## Mettre à jour un site cPanel existant (0.3.x → 0.4.x)
+## Mettre à jour un site cPanel existant (0.3.x / 0.4.x → 0.5.x)
 
-**[Télécharger le ZIP de mise à jour v0.4.1](https://github.com/norbertyong/actu/releases/download/v0.4.1/actu-cpanel-update-v0.4.1.zip)** · [SHA256](https://github.com/norbertyong/actu/releases/download/v0.4.1/actu-cpanel-update-v0.4.1.zip.sha256)
+**[Télécharger le ZIP de mise à jour v0.5.0](https://github.com/norbertyong/actu/releases/download/v0.5.0/actu-cpanel-update-v0.5.0.zip)** · [SHA256](https://github.com/norbertyong/actu/releases/download/v0.5.0/actu-cpanel-update-v0.5.0.zip.sha256)
 
-Ce ZIP convient à un site déjà installé avec le **paquet cPanel 0.3.x ou 0.4.x**, dont le code privé se trouve dans `.actu/`. Il ne contient ni configuration, ni stockage, ni marqueur d’activation de l’installateur.
+Ce ZIP convient à un site déjà installé avec le **paquet cPanel 0.3.x, 0.4.x ou 0.5.x**, dont le code privé se trouve dans `.actu/`. Il ne contient ni configuration, ni stockage, ni marqueur d’activation de l’installateur.
 
 1. Suspendez le cron et mettez le site en maintenance depuis l’hébergement. Attendez la fin des collectes/générations en cours.
 2. Sauvegardez le dossier complet, en particulier `.actu/config/` et `.actu/storage/`. Pour une sauvegarde SQLite cohérente, arrêtez les écritures et conservez aussi les éventuels fichiers `-wal` et `-shm`.
-3. Envoyez **`actu-cpanel-update-v0.4.1.zip`** dans le dossier du site et extrayez son contenu en remplaçant les fichiers du code. Activez l’affichage des fichiers cachés. **Ne supprimez pas les dossiers existants.**
+3. Envoyez **`actu-cpanel-update-v0.5.0.zip`** dans le dossier du site et extrayez son contenu en remplaçant les fichiers du code. Activez l’affichage des fichiers cachés. **Ne supprimez pas les dossiers existants.**
 4. Vérifiez que `.actu/config/local.php` et `.actu/storage/actu.sqlite` sont toujours présents. Leurs contenus sont conservés ; les nouvelles tables sont créées automatiquement au premier accès.
-5. Rouvrez le site, connectez-vous et vérifiez **À traiter**, **Vulnérabilités → Regrouper par CVE** et **Administration → Diagnostic**. Réactivez le cron.
+5. Rouvrez le site, connectez-vous et vérifiez **À traiter**, **Vulnérabilités → Regrouper par CVE**, **Administration → Suivi des CVE** et **Administration → Diagnostic**. Réactivez le cron.
 6. Configurez Groq ci-dessous si vous souhaitez activer l’IA.
 
 Pour revenir en arrière, arrêtez les écritures puis restaurez ensemble le code, la configuration et le stockage sauvegardés. Pour une installation **depuis les sources** avec `public/`, mettez à jour le code source en conservant le stockage et la configuration privés ; n’appliquez pas le ZIP cPanel à cette disposition.
+
+## Suivi opérationnel des CVE
+
+Ouvrez **Administration → Suivi des CVE** (`tracking.php`). Depuis un dossier public, le lien **Ouvrir la fiche de suivi** apparaît également pour l’administrateur. Une fiche est commune à l’installation et indépendante des favoris du navigateur.
+
+### Premier traitement, étape par étape
+
+1. Ouvrez une CVE du tableau et cliquez sur **Commencer le suivi**, ou saisissez son identifiant dans **Ouvrir un suivi**. La saisie manuelle est possible avant toute collecte ; le site vérifie le format, pas l’existence dans le registre CVE.
+2. Renseignez le **statut**, la **priorité interne**, le **responsable**, l’**échéance interne** et les **systèmes/versions concernés**. Décrivez les mesures compensatoires et le plan de remédiation.
+3. Ajoutez les actions à réaliser, chacune avec son responsable et son échéance. Une action peut être **À faire**, **Terminée** ou **Annulée**. Une annulation exige un motif ; les actions restent dans l’historique.
+4. Documentez votre décision et ajoutez un lien vers un ticket ou un justificatif. Ces liens peuvent pointer vers votre outil interne ; le serveur ne les télécharge pas et aucun fichier n’est téléversé.
+5. Terminez ou annulez les actions ouvertes avant de passer la fiche à **Corrigé** ou **Non concerné**. Une justification est obligatoire. Pour accepter un risque, indiquez aussi un responsable et une date de réexamen.
+6. Ajoutez vos observations dans **Notes et historique**. Consultez les changements avant/après, leur date et le compte administrateur utilisé. Une réouverture ou un changement de décision depuis Corrigé, Non concerné ou Risque accepté exige un motif.
+
+| Statut | Signification et règle |
+| --- | --- |
+| Non suivi | CVE connue des flux, sans fiche interne. Consulter une page n’ouvre pas automatiquement un suivi. |
+| À analyser | Suivi ouvert ; applicabilité à vérifier. |
+| Concerné | Exposition identifiée sur votre périmètre. |
+| En cours | Traitement engagé. |
+| Corrigé | Justification obligatoire, aucune action encore à faire ; clôture horodatée. |
+| Non concerné | Justification obligatoire, aucune action encore à faire ; clôture horodatée. |
+| Risque accepté | Justification, responsable et date de réexamen obligatoires. La fiche reste ouverte et le risque n’est pas considéré comme corrigé. |
+
+La priorité interne est une décision manuelle. Elle ne modifie ni CVSS ni KEV. Les descriptions de systèmes et versions sont du texte libre : aucun inventaire automatique ou diagnostic d’applicabilité n’est effectué.
+
+### Tableau de suivi et rappels
+
+- Recherche par CVE, éditeur, produit et système interne, sans distinction de casse ; filtre par statut, priorité, KEV et responsable de fiche ou d’action ouverte.
+- Vues **En retard**, **À réexaminer**, **Échéances sous 7 jours**, tri par priorité/KEV/CVSS, échéance de fiche, dernière modification ou CVSS.
+- Les quatre compteurs couvrent tout le registre ; la liste et les exports respectent les filtres choisis. Pagination de 25 CVE.
+- Les dates internes utilisent **Europe/Paris**. Une échéance passée devient en retard le lendemain ; une acceptation de risque est à réexaminer dès sa date de réexamen. Les dates CISA restent distinctes des échéances internes.
+- Les rappels sont visibles dans le tableau. Renseigner un responsable n’envoie aucun email, webhook ou invitation et ne crée pas de compte utilisateur.
+
+### Nouvelles informations et conservation des décisions
+
+Une nouvelle publication liée à la CVE, la modification de son titre/extrait, le retrait d’une référence dans un article ou un changement des données KEV/CVSS signale **Nouvelles informations à réexaminer**. Une collecte identique ne produit pas de faux rappel. La décision et les notes restent conservées, y compris pour une fiche clôturée.
+
+Après lecture, utilisez **Confirmer l’examen des informations**. Ce bouton ne modifie pas le statut et ne renouvelle pas l’acceptation d’un risque expiré : actualisez la décision et la date de réexamen séparément. Les changements de contenu complet chez un éditeur ne sont pas détectés si le titre/extrait du flux reste identique.
+
+Les formulaires détectent les modifications concurrentes. Si un autre onglet ou administrateur a modifié la fiche, l’enregistrement est refusé avec un message ; votre saisie reste affichée pour être copiée avant rechargement. Une arrivée de nouvelles informations pendant l’examen empêche leur acquittement à partir d’une ancienne version.
+
+### Exports, confidentialité et sauvegardes
+
+- **CSV privé filtré** : fiche, statut, responsable, dates, indicateurs, contexte, décision et liens. Maximum 10 000 CVE ; au-delà, l’export demande de préciser les filtres au lieu de tronquer silencieusement. Les préfixes de formule sont neutralisés.
+- **Fiche Markdown** : décision, contexte, plan d’actions, publications et historique. Jusqu’à 1 000 actions, 1 000 publications et les 1 000 derniers événements, limites indiquées dans le document. Les champs utilisateur sont placés dans des blocs de texte.
+- Les fiches, notes, responsables et exports exigent une session administrateur ; ils n’apparaissent pas dans les pages ou exports RSS/CSV publics. Les mutations exigent un jeton CSRF.
+- Le module ne transmet aucune donnée interne à Groq. Le lien **Résumé IA de l’article** utilise uniquement le titre et l’extrait public selon la configuration IA existante.
+- Les responsables sont des noms ou équipes libres. L’historique utilise l’identifiant du compte administrateur connecté ; partager ce compte ne permet pas d’identifier individuellement ses utilisateurs. Il n’y a pas de gestion multi-comptes dans cette version.
+- Le suivi est conservé même si les articles associés disparaissent. L’historique est non modifiable depuis l’interface, mais ne constitue pas un journal cryptographiquement inviolable. Pas de suppression automatique des fiches ou de leur historique : surveillez le stockage et incluez toute la base SQLite dans vos sauvegardes.
+
+### Mise à jour vers 0.5.0
+
+Utilisez le ZIP de mise à jour cPanel et remplacez **aussi les fichiers cachés de `.actu/app/`**. Les tables `cve_cases`, `cve_tasks` et `cve_events` sont ajoutées automatiquement ; sources, articles, favoris, configuration et cache IA sont conservés. Aucune commande de migration séparée n’est nécessaire. Le paquet complet et celui de mise à jour incluent les trois pages `tracking.php`, `cve.php`, `tracking-export.php` et leur code privé.
+
+Si le menu est absent après extraction, vérifiez la racine réelle du domaine, le pied de page **v0.5.0**, `.actu/VERSION` et la présence de **Suivi des CVE** dans `.actu/app/view.php`. Si ces fichiers sont corrects mais que l’ancien code s’affiche encore, faites vider OPcache/recharger PHP par l’hébergeur. Préservez toujours `.actu/config/` et `.actu/storage/`.
 
 ## Activer les résumés IA avec Groq
 
@@ -167,7 +225,7 @@ Dans le cloud avec proxy, préparez l’image via la commande `docker build --se
 
 ## Installation avancée sur cPanel depuis les sources
 
-Cette méthode manuelle reste disponible pour le code source v0.4.1, avec une racine web `public/` distincte. Pour copier l’archive prête à installer, suivez uniquement l’installation express ci-dessus.
+Cette méthode manuelle reste disponible pour le code source v0.5.0, avec une racine web `public/` distincte. Pour copier l’archive prête à installer, suivez uniquement l’installation express ci-dessus.
 
 Cette procédure installe **le code source sans Docker** sur un hébergement cPanel avec Apache/LiteSpeed et PHP-FPM/CGI. Les noms de menus peuvent varier selon l’hébergeur. Aucun MySQL, Node.js, Composer ou accès root n’est nécessaire.
 
@@ -193,9 +251,9 @@ Ne créez pas de base MySQL dans cPanel : SQLite est initialisé automatiquement
 
 ### Étape 2 — Télécharger et extraire la release
 
-1. Ouvrez [la release v0.4.1](https://github.com/norbertyong/actu/releases/tag/v0.4.1), puis téléchargez **Source code (zip)** dans **Assets**.
+1. Ouvrez [la release v0.5.0](https://github.com/norbertyong/actu/releases/tag/v0.5.0), puis téléchargez **Source code (zip)** dans **Assets**.
 2. Dans **Fichiers → Gestionnaire de fichiers**, ouvrez votre répertoire personnel `/home/CPUSER`, puis envoyez l’archive.
-3. Extrayez-la. GitHub crée normalement un dossier `actu-0.4.1` ; renommez-le en `actu` si ce nom est libre. Ne remplacez pas une installation existante sans sauvegarde.
+3. Extrayez-la. GitHub crée normalement un dossier `actu-0.5.0` ; renommez-le en `actu` si ce nom est libre. Ne remplacez pas une installation existante sans sauvegarde.
 4. Dans les paramètres du gestionnaire, activez **Afficher les fichiers masqués / Show Hidden Files** et vérifiez la présence des fichiers `.htaccess` à la racine et dans `public/`.
 
 L’arborescence attendue est :
@@ -231,7 +289,7 @@ Certaines interfaces demandent seulement `actu/public`, relatif au répertoire p
 
 Le DocumentRoot du **domaine principal** n’est généralement pas modifiable depuis cPanel, et certaines offres imposent tous les domaines sous `public_html`. Dans ce cas, utilisez un sous-domaine dont la racine est configurable ou demandez à l’hébergeur de pointer le domaine vers `actu/public`. Si le panneau interdit un dossier hors de `public_html`, faites valider une disposition sûre par l’hébergeur ; ne rendez pas les dossiers `app/`, `bin/` ou `storage/` accessibles pour contourner la restriction. Cette procédure suppose cette racine publique correctement configurée.
 
-Le paquet prêt à installer v0.4.1 prend également en charge les sous-dossiers. La procédure avancée ci-dessous conserve la disposition de développement avec une racine `public/` distincte.
+Le paquet prêt à installer v0.5.0 prend également en charge les sous-dossiers. La procédure avancée ci-dessous conserve la disposition de développement avec une racine `public/` distincte.
 
 ### Étape 4 — Activer HTTPS
 
@@ -410,7 +468,7 @@ Ajoutez `--send` uniquement lorsque vous souhaitez effectivement envoyer les not
 | Modifications `.user.ini` sans effet | Attendre le délai de cache, vérifier le handler PHP du domaine et demander un rechargement/configuration du pool si nécessaire. |
 | Erreur de session ou formulaire expiré | Vérifier `session.save_path`, l’accès en écriture des sessions, les cookies et HTTPS ; ne forcer `ACTU_HTTPS=1` que pour un vrai accès HTTPS. |
 
-Ces instructions sont adaptées au code v0.4.1. L’installation cPanel réelle dépend des fonctions et limites de votre hébergeur ; elle n’a pas été exécutée sur votre compte depuis cet environnement.
+Ces instructions sont adaptées au code v0.5.0. L’installation cPanel réelle dépend des fonctions et limites de votre hébergeur ; elle n’a pas été exécutée sur votre compte depuis cet environnement.
 
 ## Connexion administrateur
 
@@ -438,6 +496,7 @@ L’accès se fait par **Administration**. Après cinq échecs depuis la même a
 | **Vulnérabilités** | Articles de catégorie `vulprod` ou contenant une CVE ; filtre exploitation connue via CISA KEV. |
 | **Favoris** | Articles enregistrés sur ce navigateur. |
 | **Sources** | État, dernier succès de collecte et nombre d’articles conservés par source. |
+| **Suivi des CVE** (administration) | Registre privé, fiches, décisions, responsables, échéances, actions, notes, historique et exports. |
 | **Administration** | Tableau de bord, gestion des sources, alertes, statistiques, **Diagnostic**, **Paramètres IA** et déconnexion. |
 | **Thème** | Alterne automatique, clair et sombre ; choix mémorisé localement. |
 | **Versions** / **Confidentialité** | Notes de livraison et gestion des données personnelles, en pied de page. |
@@ -565,6 +624,7 @@ Résultats et limites de la validation locale : [docs/VALIDATION.md](docs/VALIDA
 php tests/run.php
 php tests/collector.php
 php tests/evolution.php
+php tests/tracking.php
 for file in app/*.php public/*.php bin/*.php tests/*.php; do php -l "$file" || exit 1; done
 ```
 
@@ -580,7 +640,7 @@ Avant livraison : mettre à jour `VERSION`, ce README et `RELEASE_NOTES.md`, ex�
 
 ```sh
 git fetch origin --tags
-git switch --detach v0.4.1   # après publication de ce tag
+git switch --detach v0.5.0   # après publication de ce tag
 ```
 
 Ne déplacez pas un tag publié. Le numéro courant est aussi affiché dans le pied de page du site. La publication GitHub est une opération distincte du déploiement.

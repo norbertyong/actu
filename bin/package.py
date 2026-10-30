@@ -54,6 +54,7 @@ files['INSTALLATION.txt'] = '''ACTU CYBER & IT — INSTALLATION CPANEL
 4. Dans le gestionnaire cPanel, affichez les fichiers cachés et lisez .actu/config/install.key (créé sur le serveur à la première visite).
 5. Saisissez ce code dans l’assistant et choisissez votre utilisateur/mot de passe administrateur.
 6. Connectez-vous et cliquez sur « Récupérer les articles » dans l’administration.
+7. Ouvrez Administration → Suivi des CVE pour attribuer et traiter les vulnérabilités.
 
 Aucun terminal, fichier .env ou base MySQL à préparer. Les règles .htaccess doivent être actives (Apache/LiteSpeed). Ne pas utiliser cette disposition sous Nginx sans règles explicites interdisant tout accès à .actu.
 Utilisez HTTPS. L’assistant se verrouille après installation ; aucun identifiant par défaut n’est livré.
@@ -66,20 +67,21 @@ Adapter les chemins. Sans cron, la collecte peut être lancée depuis l’admini
 '''.encode()
 if args.update:
     files = {name: data for name, data in files.items() if not name.startswith(('.actu/config/', '.actu/storage/'))}
-    files['INSTALLATION.txt'] = '''ACTU CYBER & IT — MISE À JOUR DEPUIS LE PAQUET CPANEL 0.3.x OU 0.4.x
+    files['INSTALLATION.txt'] = '''ACTU CYBER & IT — MISE À JOUR DEPUIS LE PAQUET CPANEL 0.3.x, 0.4.x OU 0.5.x
 
 1. Mettre le site en maintenance depuis l’hébergement et suspendre le cron.
 2. Sauvegarder le dossier complet du site (notamment .actu/config et .actu/storage).
 3. Extraire TOUT le contenu de cette archive par-dessus le dossier existant, fichiers cachés inclus, en remplaçant les fichiers du code.
 4. Conserver impérativement .actu/config et .actu/storage : cette archive ne les contient pas et n’active pas l’installateur.
 5. Rouvrir le site, vérifier Sources et Diagnostic, réactiver le cron. Les nouvelles tables SQLite sont créées automatiquement.
-6. Pour Groq : Administration → Paramètres IA. Saisir votre clé privée, choisir un modèle compatible JSON et activer l’IA. La clé reste sur le serveur.
+6. Suivi des CVE : Administration → Suivi des CVE (tracking.php). Les nouvelles tables sont créées sans réinitialiser les données.
+7. Pour Groq : Administration → Paramètres IA. Saisir votre clé privée, choisir un modèle compatible JSON et activer l’IA. La clé reste sur le serveur.
 
 Sauvegarder avec les processus PHP/collecteurs arrêtés pour inclure un état SQLite cohérent (base et éventuels fichiers -wal/-shm).
 Ne pas utiliser ce paquet pour une première installation ou sur une ancienne disposition depuis les sources avec public/.
 Pour revenir en arrière : arrêter les écritures puis restaurer ensemble le code, la configuration et le stockage sauvegardés.
 '''.encode()
-required = {'settings.php', 'ai.php', 'dashboard.php', 'diagnostics.php', 'technologies.php', 'dossiers.php', '.actu/app/ai.php', '.actu/README.md'}
+required = {'tracking.php', 'cve.php', 'tracking-export.php', '.actu/app/tracking.php', '.actu/app/tracking_view.php', 'settings.php', 'ai.php', 'dashboard.php', 'diagnostics.php', 'technologies.php', 'dossiers.php', '.actu/app/ai.php', '.actu/README.md'}
 if not required.issubset(files):
     raise SystemExit('Paquet incomplet : ' + ', '.join(sorted(required - files.keys())))
 files['CONTENU.txt'] = ('Actu ' + version + '\n' + '\n'.join(sorted(files)) + '\n').encode()

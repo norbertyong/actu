@@ -17,6 +17,7 @@ require_once __DIR__ . "/core.php";
 require_once __DIR__ . "/feeds.php";
 require_once __DIR__ . "/watch.php";
 require_once __DIR__ . "/ai.php";
+require_once __DIR__ . "/tracking.php";
 if (PHP_SAPI !== "cli") {
     ini_set("display_errors", "0");
     set_exception_handler(function (Throwable $error): void {

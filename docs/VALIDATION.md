@@ -1,5 +1,23 @@
 # Validation
 
+## Version 0.5.0 — 30 octobre 2026
+
+**393 contrôles fonctionnels réussis** dans des installations temporaires isolées :
+
+| Vérification | Résultat |
+| --- | --- |
+| `php tests/run.php` | 52 contrôles existants rejoués. |
+| `php tests/collector.php` | 12 contrôles HTTP via proxy local simulant les flux. |
+| `php tests/evolution.php` | 44 contrôles de veille personnalisée et Groq simulé. |
+| `php tests/tracking.php` | 60 contrôles : identifiants, transitions, justification, actions et échéances, réouvertures, risques acceptés, historique, nouvelles publications/KEV/CVSS, conservation après disparition des sources, formules CSV et concurrence réelle de deux processus PHP. |
+| `node tests/browser.cjs` | 33 contrôles dans l’installation depuis les sources, dont les trois nouvelles routes du module. |
+| `node tests/deployment.cjs` | 192 contrôles Apache en racine et sous-dossier. Installation, migrations depuis des schémas antérieurs, conservation de la clé Groq/cache/quotas/technologies et des données existantes, formulaires, exports privés, absence de notes internes dans les flux publics, CSRF, affichage mobile, conflits entre onglets y compris après une erreur de validation. |
+| Vérifications statiques | Syntaxe de tous les PHP, JavaScript des tests et générateur Python ; `git diff --check` sans erreur. |
+
+Les tests utilisent le paquet cPanel réellement généré et vérifient l’ajout des tables CVE sur une base déjà peuplée. Les instantanés de comparaison des configurations sont des empreintes ; les secrets ne sont pas affichés. La capture desktop a également été examinée pour la lisibilité du tableau ; les parcours mobiles vérifient l’absence de débordement de page.
+
+Aucun déploiement n’a été effectué sur le cPanel personnel de l’utilisateur, aucun message externe n’a été envoyé et aucun compte Groq réel n’a été utilisé. Le module fournit des rappels dans son tableau, des champs de responsables libres et des justificatifs par texte/lien ; il ne crée pas de comptes, n’envoie pas de tickets et ne réalise pas de découverte automatique des systèmes.
+
 ## Version 0.4.0 — 29 octobre 2026
 
 **250 contrôles fonctionnels réussis**, sur des bases temporaires sans données utilisateur :

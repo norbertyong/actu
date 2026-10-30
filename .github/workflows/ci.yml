@@ -21,6 +21,7 @@ jobs:
           php tests/run.php
           php tests/collector.php
           php tests/evolution.php
+          php tests/tracking.php
       - name: Dépendances navigateur
         run: |
           npm ci --ignore-scripts

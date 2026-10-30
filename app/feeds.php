@@ -339,6 +339,8 @@ function save_article(int $source, array $item): int
     }
     $url = preg_replace('/#.*$/', "", $url);
     $guid = hash("sha256", $url);
+    $previous = run('SELECT id,title,summary FROM articles WHERE guid=?', [$guid])->fetch();
+    $previousCves = $previous ? run('SELECT cve_id FROM article_cves WHERE article_id=?', [$previous['id']])->fetchAll(PDO::FETCH_COLUMN) : [];
     run(
         "INSERT INTO articles(guid,source_id,title,url,summary,author,published,created) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(guid) DO UPDATE SET title=excluded.title,summary=excluded.summary,author=excluded.author",
         [
@@ -366,6 +368,9 @@ function save_article(int $source, array $item): int
         run("INSERT OR IGNORE INTO cves(id) VALUES(?)", [$cve]);
         run("INSERT OR IGNORE INTO article_cves VALUES(?,?)", [$id, $cve]);
     }
+    if (!$previous || $previous['title'] !== $item['title'] || $previous['summary'] !== $item['summary']) {
+        foreach (array_unique([...$previousCves, ...array_map('strtoupper', $matches[0])]) as $cve) tracking_signal($cve);
+    }
     return $id;
 }
 function import_kev(int $source, string $json): int
@@ -383,6 +388,7 @@ function import_kev(int $source, string $json): int
         if (!preg_match('/^CVE-\d{4}-\d{4,}$/D', $id)) {
             continue;
         }
+        $previousCve = run('SELECT * FROM cves WHERE id=?', [$id])->fetch();
         run(
             "INSERT INTO cves(id,vendor,product,exploited,action,due_date) VALUES(?,?,?,1,?,?) ON CONFLICT(id) DO UPDATE SET vendor=excluded.vendor,product=excluded.product,exploited=1,action=excluded.action,due_date=excluded.due_date",
             [
@@ -393,6 +399,7 @@ function import_kev(int $source, string $json): int
                 (string) ($v["dueDate"] ?? ""),
             ],
         );
+        tracking_metadata_changed($id, $previousCve);
         save_article($source, [
             "title" =>
                 $id .
@@ -599,10 +606,12 @@ function import_cvss(string $id, string $json): ?float
             foreach ($cve["metrics"][$format] ?? [] as $metric) {
                 $score = $metric["cvssData"]["baseScore"] ?? null;
                 if (is_numeric($score) && $score >= 0 && $score <= 10) {
+                    $previousCve = run('SELECT * FROM cves WHERE id=?', [$id])->fetch();
                     run("UPDATE cves SET cvss=? WHERE id=?", [
                         (float) $score,
                         $id,
                     ]);
+                    tracking_metadata_changed($id, $previousCve);
                     return (float) $score;
                 }
             }

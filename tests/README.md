@@ -2,6 +2,8 @@
 
 ## PHP
 
+`php tests/tracking.php` utilise une base temporaire pour vérifier le suivi CVE : validation, états, actions, échéances, clôtures et réouvertures, réexamens KEV/CVSS, conservation de l’historique, exports et deux processus concurrents sur une même fiche. Aucune source réelle n’est appelée.
+
 `php tests/evolution.php` vérifie technologies, isolation des lecteurs, dossiers CVE, diagnostics et intégration Groq avec un transport simulé. Il inclut des processus PHP concurrents pour tester le quota atomique ; aucune clé réelle ni requête Groq ne sont utilisées.
 
 `php tests/run.php` crée sa propre base temporaire et ne dépend d’aucun service externe. Il échoue au premier résultat incorrect. Aucun email ou webhook n’est envoyé.
@@ -31,6 +33,8 @@ Les identifiants ci-dessus servent uniquement à ce serveur de test lié à loca
 Options : `ACTU_TEST_URL`, `ACTU_TEST_USER`, `ACTU_TEST_PASSWORD`, `CHROMIUM_PATH`. Ne visez jamais une installation de production. L’import KEV, CVSS et les refus de destinations internes sont couverts par les tests PHP ; la disponibilité réelle des éditeurs et la livraison email/webhook nécessitent une vérification d’intégration distincte avec vos services configurés.
 
 ## Paquet prêt à installer (Apache)
+
+Le parcours appelle aussi `tests/tracking-browser.cjs` : fiches privées, contrôle CSRF, actions, décisions, notes, conflits entre onglets, nouveaux signaux, exports, absence de fuite dans les flux publics et vues mobiles. Il teste le module à la racine et dans `/veille`, après ajout automatique de ses tables sur une base sans le module.
 
 Ce parcours inclut `tests/evolution-browser.cjs` : technologies, regroupement CVE, paramètres Groq, cache, quotas, données privées et affichage mobile. Le ZIP de mise à jour est appliqué sur un schéma sans les nouvelles tables pour vérifier la migration et la conservation des données. Tous les appels Groq y sont simulés ou bloqués volontairement par le quota avant le transport.
 

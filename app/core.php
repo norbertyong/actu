@@ -61,6 +61,29 @@ function db(): PDO
         CREATE TABLE IF NOT EXISTS ai_usage (day TEXT PRIMARY KEY, requests INTEGER NOT NULL DEFAULT 0, reserved_tokens INTEGER NOT NULL DEFAULT 0);
         CREATE INDEX IF NOT EXISTS article_cves_cve ON article_cves(cve_id,article_id);
         CREATE INDEX IF NOT EXISTS articles_source ON articles(source_id,published);
+        CREATE TABLE IF NOT EXISTS cve_cases (
+            cve_id TEXT PRIMARY KEY REFERENCES cves(id) ON DELETE RESTRICT,
+            status TEXT NOT NULL DEFAULT 'analyze' CHECK(status IN ('analyze','affected','progress','fixed','unaffected','accepted')),
+            priority TEXT NOT NULL DEFAULT 'normal' CHECK(priority IN ('urgent','high','normal','low')),
+            owner TEXT NOT NULL DEFAULT '', due_date TEXT NOT NULL DEFAULT '', review_date TEXT NOT NULL DEFAULT '',
+            scope TEXT NOT NULL DEFAULT '', mitigation TEXT NOT NULL DEFAULT '', decision TEXT NOT NULL DEFAULT '',
+            evidence_url TEXT NOT NULL DEFAULT '', ticket_url TEXT NOT NULL DEFAULT '',
+            revision INTEGER NOT NULL DEFAULT 1, signal_version INTEGER NOT NULL DEFAULT 0, reviewed_signal INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, closed_at INTEGER
+        );
+        CREATE TABLE IF NOT EXISTS cve_tasks (
+            id INTEGER PRIMARY KEY, cve_id TEXT NOT NULL REFERENCES cve_cases(cve_id) ON DELETE RESTRICT,
+            title TEXT NOT NULL, owner TEXT NOT NULL DEFAULT '', due_date TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'todo' CHECK(status IN ('todo','done','cancelled')),
+            created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS cve_tasks_case ON cve_tasks(cve_id,status);
+        CREATE TABLE IF NOT EXISTS cve_events (
+            id INTEGER PRIMARY KEY, cve_id TEXT NOT NULL REFERENCES cve_cases(cve_id) ON DELETE RESTRICT,
+            actor TEXT NOT NULL, kind TEXT NOT NULL, changes TEXT NOT NULL, note TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS cve_events_case ON cve_events(cve_id,id DESC);
+        CREATE INDEX IF NOT EXISTS cve_cases_status ON cve_cases(status,due_date);
         SQL
         ,
     );
@@ -172,6 +195,7 @@ function login(string $user, string $pass): bool
         session_regenerate_id(true);
     }
     $_SESSION["admin_time"] = $now;
+    $_SESSION['admin_user'] = $expected;
     $_SESSION["csrf"] = bin2hex(random_bytes(32));
     return true;
 }

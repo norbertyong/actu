@@ -5,6 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const evolution = require('./evolution-browser.cjs');
+const tracking = require('./tracking-browser.cjs');
 const env = {...process.env};
 for (const key of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH']) delete env[key];
 const docker = (...args) => execFileSync('docker',['--host=unix:///var/run/docker.sock',...args],{env,encoding:'utf8',stdio:['pipe','pipe','pipe']});
@@ -59,7 +60,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
    await page.getByRole('button',{name:'Ajouter aux favoris'}).click();await page.getByRole('link',{name:'Favoris',exact:true}).click();check(page.url()===base+'/favorites.php' && await page.locator('.article-card').count()===1,'Formulaires et redirections des favoris');
    // Simulate the pre-0.4 schema with real existing credentials, articles and favorites.
    const snapshot=`echo hash('sha256',file_get_contents('${privateRoot}/config/local.php').json_encode(run('SELECT * FROM articles')->fetchAll()).json_encode(run('SELECT * FROM states')->fetchAll()));`;
-   const before=docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';${snapshot}db()->exec('DROP TABLE technologies; DROP TABLE ai_cache; DROP TABLE ai_usage');`);
+   const before=docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';${snapshot}db()->exec('DROP TABLE cve_events; DROP TABLE cve_tasks; DROP TABLE cve_cases; DROP TABLE technologies; DROP TABLE ai_cache; DROP TABLE ai_usage');`);
    docker('cp',path.join(temp,'update')+'/.',name+':/var/www/html'+prefix);
    docker('exec',name,'chown','-R','www-data:www-data','/var/www/html'+prefix);
    const after=docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';${snapshot}`);
@@ -67,6 +68,16 @@ with zipfile.ZipFile(sys.argv[1]) as z:
    check(docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';echo run("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('technologies','ai_cache','ai_usage')")->fetchColumn();`)==='3','Migration additive crée les trois nouvelles tables');
    check((await context.request.get(base+'/install.php')).status()===404,'Mise à jour ne réactive pas l’installateur');
    await evolution({context,page,base,docker,name,privateRoot,check});
+   check(docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';echo run("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('cve_cases','cve_tasks','cve_events')")->fetchColumn();`)==='3','Migration additive du module CVE');
+   // Upgrade from a populated 0.4-style database; only the new workflow tables are absent.
+   docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';ai_save_config(['model'=>'llama-3.3-70b-versatile','daily_requests'=>'20','daily_tokens'=>'100000','key'=>'test_preserved_key_for_upgrade_only']);add_technology('upgrade-fixture','FortiOS');run('INSERT OR REPLACE INTO ai_usage VALUES(?,3,10000)',[gmdate('Y-m-d')]);run('INSERT OR REPLACE INTO ai_cache VALUES(1,?,?,?,?)',['fixture','offline-model','{}',time()]);`);
+   const aiSnapshot=`echo hash('sha256',file_get_contents(store_dir().'/groq.json').json_encode(run('SELECT * FROM ai_usage ORDER BY day')->fetchAll()).json_encode(run('SELECT * FROM ai_cache ORDER BY article_id')->fetchAll()).json_encode(run('SELECT * FROM technologies ORDER BY id')->fetchAll()));`;
+   const aiBefore=docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';${aiSnapshot}db()->exec('DROP TABLE cve_events; DROP TABLE cve_tasks; DROP TABLE cve_cases');`);
+   docker('cp',path.join(temp,'update')+'/.',name+':/var/www/html'+prefix);
+   docker('exec',name,'chown','-R','www-data:www-data','/var/www/html'+prefix);
+   const aiAfter=docker('exec',name,'php','-r',`require '${privateRoot}/app/bootstrap.php';${aiSnapshot}`);
+   check(aiBefore===aiAfter,'Migration depuis 0.4 conserve clé Groq, cache, quotas et technologies');
+   await tracking({context,page,base,docker,name,privateRoot,check});
    await page.setViewportSize({width:390,height:844});check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Affichage mobile');
    await page.getByRole('button',{name:'Déconnexion',exact:true}).click();check(page.url()===base+'/login.php','Déconnexion du paquet');
    await context.close();

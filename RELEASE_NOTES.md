@@ -2,6 +2,32 @@
 
 ## Non publié
 
+## v0.5.0 — 30 octobre 2026
+
+### Module privé de suivi des CVE
+
+- Tableau de suivi dans l’administration : recherche, filtres par statut, priorité, responsable, KEV, retards, réexamens et échéances sous sept jours ; pagination et compteurs.
+- Une fiche par CVE, ouverte depuis les flux ou par saisie manuelle de son identifiant. La consultation seule n’écrit pas de décision.
+- Statuts À analyser, Concerné, En cours, Corrigé, Non concerné et Risque accepté ; priorité interne, responsable, échéance, systèmes/versions et plan de remédiation.
+- Actions avec responsables, échéances, états À faire/Terminée/Annulée ; les annulations sont justifiées. Une clôture exige une justification et aucune action ouverte.
+- Acceptation du risque avec responsable et date de réexamen obligatoires ; rappels visibles dans le tableau, sans envoi externe.
+- Notes, liens vers justificatifs et tickets, historique horodaté avec auteur et valeurs avant/après. La réouverture d’une décision est justifiée.
+- Nouvelles publications, corrections de flux et changements KEV/CVSS signalés pour réexamen, sans écraser le statut. Les collectes identiques ne génèrent pas de faux rappel.
+- Conflits entre formulaires détectés par révision et transaction SQLite ; la saisie non enregistrée reste consultable. Les informations arrivées après ouverture ne peuvent pas être acquittées silencieusement.
+- CSV privé filtré et fiche Markdown avec décisions, actions, sources et historique. Données internes absentes des exports publics et des demandes Groq.
+
+### Déploiement et compatibilité
+
+- Migration SQLite additive automatique ; conservation des configurations, articles, favoris et données IA. Le suivi reste conservé quand les publications disparaissent.
+- Paquets cPanel complets et de mise à jour, README embarqué, inventaire et contrôles de présence des pages du module.
+- Routeur de développement complété pour le suivi et les écrans de la version 0.4.x.
+- Les responsables sont des champs libres ; le compte administrateur existant reste le mécanisme d’accès. Pas d’envoi automatique de tickets ou de messages, ni d’analyse automatique de l’exposition des versions.
+
+### Validation
+
+- 393 contrôles réussis : 52 PHP existants, 12 collecte HTTP, 44 évolutions/Groq simulé, 60 suivi CVE, 33 parcours depuis les sources et 192 contrôles Apache/installation/migration. Détail dans `docs/VALIDATION.md`.
+- Aucun accès au cPanel personnel ni appel Groq réel ; le déploiement sur l’hébergement reste à effectuer avec le paquet adapté.
+
 ## v0.4.1 — 29 octobre 2026
 
 - Validation : 112 contrôles Apache réussis en racine et sous-dossier, incluant installation, mise à jour et paramètres IA.

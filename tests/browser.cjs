@@ -103,6 +103,10 @@ const fs = require("node:fs");
       .fill(process.env.ACTU_TEST_PASSWORD || "local-testing-only-2026");
     await page.getByRole("button", { name: "Se connecter" }).click();
     check(page.url().endsWith("/admin.php"), "Connexion");
+    for (const route of ["/tracking.php", "/cve.php?id=CVE-2026-12345", "/tracking-export.php"]) {
+      const response = await context.request.get(base + route);
+      check(response.status() === 200, "Route source du suivi accessible : " + route);
+    }
     const session = await context.cookies();
     check(
       session.some(
